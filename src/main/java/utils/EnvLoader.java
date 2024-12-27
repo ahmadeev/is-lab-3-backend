@@ -12,6 +12,7 @@ public class EnvLoader {
     @PostConstruct
     public void init() {
         loadEnv(".env");
+        System.out.println("Env loaded");
     }
 
     public static void loadEnv(String filePath) {
