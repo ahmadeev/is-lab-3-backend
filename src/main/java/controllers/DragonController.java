@@ -35,6 +35,28 @@ public class DragonController {
         System.out.println("DragonController initialized");
     }
 
+    @POST
+    @Path("/dragon")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createDragon(@Valid DragonDTO dragonDTO, @Context SecurityContext securityContext) {
+        System.out.println("Trying to create dragon");
+
+        String username = securityContext.getUserPrincipal().getName();
+        System.out.println(username);
+
+        long userId = authService.getUserByName(username).getId();
+        System.out.println(userId);
+
+        Dragon dragon = dragonService.createEntityFromDTO(dragonDTO);
+        dragonService.createDragon(dragon, userId);
+
+        System.out.println("Successfully created dragon");
+        return Response.ok().entity(
+                new ResponseEntity(ResponseStatus.SUCCESS,"Successfully created dragon", null)
+        ).build();
+    }
+
     @GET
     @Path("/dragon/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -67,28 +89,6 @@ public class DragonController {
 
         return Response.ok().entity(
                 new ResponseEntity(ResponseStatus.SUCCESS, "", dragons)
-        ).build();
-    }
-
-    @POST
-    @Path("/dragon")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createDragon(@Valid DragonDTO dragonDTO, @Context SecurityContext securityContext) {
-        System.out.println("Trying to create dragon");
-
-        String username = securityContext.getUserPrincipal().getName();
-        System.out.println(username);
-
-        long userId = authService.getUserByName(username).getId();
-        System.out.println(userId);
-
-        Dragon dragon = dragonService.createEntityFromDTO(dragonDTO);
-        dragonService.createDragon(dragon, userId);
-
-        System.out.println("Successfully created dragon");
-        return Response.ok().entity(
-                new ResponseEntity(ResponseStatus.SUCCESS,"Successfully created dragon", null)
         ).build();
     }
 
@@ -165,5 +165,13 @@ public class DragonController {
                     new ResponseEntity(ResponseStatus.ERROR, "Dragons belong to user not found", null)
             ).build();
         }
+    }
+
+    // ---------------- дополнительные функции
+
+    public Response fun1() {
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
     }
 }
