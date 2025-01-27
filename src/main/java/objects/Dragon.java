@@ -30,7 +30,7 @@ public class Dragon {
     private Coordinates coordinates; //Поле не может быть null
 
     @NotNull(message = "Поле creationDate не должно быть пустым")
-    @Column(name = "creation-date")
+    @Column(name = "creation_date")
     private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
 
     @ManyToOne(cascade = CascadeType.PERSIST)

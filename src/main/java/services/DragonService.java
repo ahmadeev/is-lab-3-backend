@@ -6,11 +6,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import objects.*;
 import jakarta.persistence.Query;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Named(value = "mainService")
 @ApplicationScoped
@@ -36,11 +40,74 @@ public class DragonService {
     }
 
     @Transactional
-    public List<Dragon> getDragons(int page, int size) {
-        return em.createQuery("SELECT i FROM Dragon i", Dragon.class)
-                .setFirstResult(page * size)
-                .setMaxResults(size)
-                .getResultList();
+    public List<Dragon> getDragons(int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+        Map<String, String> columnNames = Map.ofEntries(
+                Map.entry("Name", "d.name"),
+                Map.entry("Coordinates: x", "c.x"),
+                Map.entry("Coordinates: y", "c.y"),
+                Map.entry("Cave: number of treasures", "c.numberOfTreasures"),
+                Map.entry("Killer: name", "p.name"),
+                Map.entry("Killer: eye color", "p.eyeColor"),
+                Map.entry("Killer: hair color", "p.hairColor"),
+                Map.entry("Killer: Location: x", "l.x"),
+                Map.entry("Killer: Location: y", "l.y"),
+                Map.entry("Killer: Location: z", "l.z"),
+                Map.entry("Killer: birthday", "p.birthday"),
+                Map.entry("Killer: height", "p.height"),
+                Map.entry("Age", "d.age"),
+                Map.entry("Description", "d.description"),
+                Map.entry("Wingspan", "d.wingspan"),
+                Map.entry("Character", "d.character"),
+                Map.entry("Head: eyes count", "dh.eyeCount"),
+                Map.entry("Head: tooth count", "dh.toothCount")
+        );
+
+
+        // Базовый JPQL-запрос
+        String baseQuery = """
+            SELECT d 
+            FROM Dragon d
+            LEFT JOIN d.coordinates c
+            LEFT JOIN d.cave dc
+            LEFT JOIN d.killer p
+            LEFT JOIN d.head dh
+            LEFT JOIN p.location l
+            WHERE 1=1
+        """;
+
+        // Фильтрация
+        boolean hasFilter = false;
+        if (filterCol != null && !filterCol.isEmpty() && filterValue != null && !filterValue.isEmpty()) {
+            baseQuery += " AND LOWER(" + columnNames.get(filterCol) + ") LIKE LOWER(:filterValue)";
+            hasFilter = true;
+        }
+
+        // Сортировка
+        if (sortBy != null && !sortBy.isEmpty() && sortDir != null && !sortDir.isEmpty()) {
+            baseQuery += " ORDER BY d." + sortBy + " " + sortDir.toUpperCase();
+        } else {
+            baseQuery += " ORDER BY d.id ASC";
+        }
+
+        // Создание TypedQuery
+        TypedQuery<Dragon> query = em.createQuery(baseQuery, Dragon.class);
+
+        // Применение фильтра
+        if (hasFilter) {
+            query.setParameter("filterValue", "%" + filterValue + "%");
+        }
+
+        // Пагинация
+        query.setFirstResult(page * pageSize);
+        query.setMaxResults(pageSize);
+
+        // Выполнение запроса
+        return query.getResultList();
+
+//        return em.createQuery("SELECT i FROM Dragon i", Dragon.class)
+//                .setFirstResult(page * size)
+//                .setMaxResults(size)
+//                .getResultList();
     }
 
     //  пока не готово

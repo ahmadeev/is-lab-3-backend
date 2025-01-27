@@ -55,9 +55,15 @@ public class DragonController {
     @Path("/dragons")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDragons(@QueryParam("page") @DefaultValue("0") int page,
-                             @QueryParam("size") @DefaultValue("10") int size) {
-        List<Dragon> dragons = dragonService.getDragons(page, size);
+    public Response getDragons(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("pageSize") @DefaultValue("10") int pageSize,
+            @QueryParam("filterValue") @DefaultValue("") String filterValue,
+            @QueryParam("filterCol") @DefaultValue("") String filterCol,
+            @QueryParam("sortBy") @DefaultValue("id") String sortBy,
+            @QueryParam("sortDir") @DefaultValue("ASC") String sortDir
+            ) {
+        List<Dragon> dragons = dragonService.getDragons(page, pageSize, filterValue, filterCol, sortBy, sortDir);
 
         return Response.ok().entity(
                 new ResponseEntity(ResponseStatus.SUCCESS, "", dragons)
