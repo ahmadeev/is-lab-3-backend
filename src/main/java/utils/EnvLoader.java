@@ -7,12 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-
 public class EnvLoader {
     @PostConstruct
     public void init() {
         loadEnv(".env");
-        System.out.println("Env loaded");
+        System.out.println("=============== Env loaded ===============");
     }
 
     public static void loadEnv(String filePath) {
@@ -20,6 +19,7 @@ public class EnvLoader {
             stream.filter(line -> line.contains("="))
                     .forEach(line -> {
                         String[] parts = line.split("=", 2);
+                        // вероятно, нужно проверять существование property
                         System.setProperty(parts[0], parts[1]);
                     });
         } catch (IOException e) {

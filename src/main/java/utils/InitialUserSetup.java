@@ -16,7 +16,12 @@ public class InitialUserSetup {
 
     @PostConstruct
     public void init() {
-        User user = new User("dada", "dada", Roles.ADMIN);
+        User dada = new User("dada", "dada", Roles.ADMIN);
+        authService.createUser(dada);
+        User admin = new User("admin", "admin", Roles.ADMIN);
+        authService.createUser(admin);
+        User user = new User("user", "user", Roles.USER);
         authService.createUser(user);
+        System.out.println("=============== User data successfully updated ===============");
     }
 }
