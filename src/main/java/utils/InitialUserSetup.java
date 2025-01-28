@@ -19,7 +19,7 @@ public class InitialUserSetup {
         User dada = new User("dada", "dada", Roles.ADMIN);
         authService.createUser(dada);
         User admin = new User("admin", "admin", Roles.ADMIN);
-        authService.createUser(admin);
+        authService.createUser(admin); // попадает в очередь
         User user = new User("user", "user", Roles.USER);
         authService.createUser(user);
         System.out.println("=============== User data successfully updated ===============");

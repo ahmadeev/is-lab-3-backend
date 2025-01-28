@@ -25,6 +25,12 @@ public class AuthFilter implements ContainerRequestFilter {
         String path = requestContext.getUriInfo().getPath();
         System.out.println(path);
 
+        // TODO: временный скип
+        if (path.startsWith("/ws/dragons")) {
+            System.out.println("Skipping WebSocket path");
+            return;
+        }
+
         if (path.startsWith("/user") || path.startsWith("/admin")) {
             // извлекаем токен из заголовка Authorization
             System.out.println("Verifying token");

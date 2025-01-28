@@ -16,6 +16,7 @@ import responses.ResponseEntity;
 import responses.ResponseStatus;
 import jakarta.inject.Inject;
 import services.DragonService;
+import utils.DragonWebSocket;
 
 import java.util.List;
 
@@ -52,6 +53,9 @@ public class DragonController {
         dragonService.createDragon(dragon, userId);
 
         System.out.println("Successfully created dragon");
+
+        DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
+
         return Response.ok().entity(
                 new ResponseEntity(ResponseStatus.SUCCESS,"Successfully created dragon", null)
         ).build();
@@ -112,6 +116,8 @@ public class DragonController {
             ).build();
         }
 
+        DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
+
         return Response.status(Response.Status.NOT_MODIFIED).entity(
                 new ResponseEntity(ResponseStatus.ERROR,"Dragon was not updated", null)
         ).build();
@@ -131,6 +137,9 @@ public class DragonController {
         System.out.println(userId);
 
         boolean isDeleted = dragonService.deleteDragonById(id, userId);
+
+        DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
+
         if (isDeleted) {
             return Response.noContent().entity(
                     new ResponseEntity(ResponseStatus.SUCCESS, "Successfully deleted dragon", null)
@@ -153,7 +162,9 @@ public class DragonController {
         long userId = authService.getUserByName(username).getId();
         System.out.println(userId);
 
-        int rowsDeleted = dragonService.deleteDragons(userId);;
+        int rowsDeleted = dragonService.deleteDragons(userId);
+
+        DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 
         if (rowsDeleted > 0) {
             //  можно использовать noContent(), но тогда не будет тела ответа
