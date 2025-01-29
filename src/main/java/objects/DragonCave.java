@@ -33,4 +33,9 @@ public class DragonCave {
             return "{}";
         }
     }
+
+    @Override
+    public String toString() {
+        return (id + ". number of treasures: " + numberOfTreasures);
+    }
 }

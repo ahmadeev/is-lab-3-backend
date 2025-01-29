@@ -37,4 +37,9 @@ public class Coordinates {
             return "{}";
         }
     }
+
+    @Override
+    public String toString() {
+        return (id + ". x: " + x + ", y: " + y);
+    }
 }

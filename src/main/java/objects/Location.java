@@ -41,4 +41,9 @@ public class Location {
             return "{}";
         }
     }
+
+    @Override
+    public String toString() {
+        return (id + ". x: " + x + ", y: " + y + ", z: " + z);
+    }
 }

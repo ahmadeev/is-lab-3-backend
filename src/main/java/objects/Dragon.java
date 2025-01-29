@@ -55,7 +55,7 @@ public class Dragon {
     private Long wingspan; //Значение поля должно быть больше 0, Поле не может быть null
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "dragon_type")
+    @Column(name = "character")
     private DragonCharacter character; //Поле может быть null
 
     @ManyToOne(cascade = CascadeType.PERSIST)

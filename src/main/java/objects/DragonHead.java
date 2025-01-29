@@ -37,4 +37,9 @@ public class DragonHead {
             return "{}";
         }
     }
+
+    @Override
+    public String toString() {
+        return (id + ". eyes: " + eyesCount + ", tooth: " + toothCount);
+    }
 }

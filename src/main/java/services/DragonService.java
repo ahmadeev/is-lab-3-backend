@@ -11,10 +11,9 @@ import jakarta.transaction.Transactional;
 import objects.*;
 import jakarta.persistence.Query;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Named(value = "mainService")
 @ApplicationScoped
@@ -29,9 +28,10 @@ public class DragonService {
     }
 
     @Transactional
-    public void createDragon(Dragon dragon, long userId) {
+    public Dragon createDragon(Dragon dragon, long userId) {
         dragon.setOwnerId(userId);
         em.persist(dragon);
+        return dragon;
     }
 
     @Transactional
@@ -45,7 +45,7 @@ public class DragonService {
                 Map.entry("Name", "d.name"),
                 Map.entry("Coordinates: x", "c.x"),
                 Map.entry("Coordinates: y", "c.y"),
-                Map.entry("Cave: number of treasures", "c.numberOfTreasures"),
+                Map.entry("Cave: number of treasures", "dc.numberOfTreasures"),
                 Map.entry("Killer: name", "p.name"),
                 Map.entry("Killer: eye color", "p.eyeColor"),
                 Map.entry("Killer: hair color", "p.hairColor"),
@@ -65,14 +65,14 @@ public class DragonService {
 
         // Базовый JPQL-запрос
         String baseQuery = """
-            SELECT d 
-            FROM Dragon d
-            LEFT JOIN d.coordinates c
-            LEFT JOIN d.cave dc
-            LEFT JOIN d.killer p
-            LEFT JOIN d.head dh
-            LEFT JOIN p.location l
-            WHERE 1=1
+        SELECT d
+        FROM Dragon d
+        LEFT JOIN FETCH d.coordinates c
+        LEFT JOIN FETCH d.cave dc
+        LEFT JOIN FETCH d.killer p
+        LEFT JOIN FETCH d.head dh
+        LEFT JOIN FETCH p.location l
+        WHERE 1=1
         """;
 
         // Фильтрация
@@ -83,10 +83,10 @@ public class DragonService {
         }
 
         // Сортировка
-        if (sortBy != null && !sortBy.isEmpty() && sortDir != null && !sortDir.isEmpty()) {
-            baseQuery += " ORDER BY d." + sortBy + " " + sortDir.toUpperCase();
+        if (sortDir != null && !sortDir.isEmpty()) {
+            baseQuery += " ORDER BY " + columnNames.getOrDefault(sortBy, "d.id") + " " + sortDir.toUpperCase();
         } else {
-            baseQuery += " ORDER BY d.id ASC";
+            baseQuery += " ORDER BY " + columnNames.getOrDefault(sortBy, "d.id") + "ASC";
         }
 
         // Создание TypedQuery
@@ -146,6 +146,24 @@ public class DragonService {
         return query.executeUpdate();
     }
 
+    // ---------------- вспомогательные функции
+
+    public List<Coordinates> getCoordinates() {
+        return em.createQuery("SELECT e FROM Coordinates e", Coordinates.class).getResultList();
+    }
+
+    public List<DragonCave> getDragonCave() {
+        return em.createQuery("SELECT e FROM DragonCave e", DragonCave.class).getResultList();
+    }
+
+    public List<Person> getPerson() {
+        return em.createQuery("SELECT e FROM Person e", Person.class).getResultList();
+    }
+
+    public List<DragonHead> getDragonHead() {
+        return em.createQuery("SELECT e FROM DragonHead e", DragonHead.class).getResultList();
+    }
+
     public Dragon createEntityFromDTO(DragonDTO dto) {
         var coordinates = dto.getCoordinates();
         var cave = dto.getCave();
@@ -190,5 +208,11 @@ public class DragonService {
                         head.getToothCount()
                 )
         );
+    }
+
+    // ---------------- дополнительные функции
+
+    public void fun1() {
+        return;
     }
 }

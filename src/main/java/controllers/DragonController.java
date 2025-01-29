@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 import services.DragonService;
 import utils.DragonWebSocket;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Named(value = "mainController")
@@ -44,20 +45,21 @@ public class DragonController {
         System.out.println("Trying to create dragon");
 
         String username = securityContext.getUserPrincipal().getName();
-        System.out.println(username);
-
         long userId = authService.getUserByName(username).getId();
-        System.out.println(userId);
 
-        Dragon dragon = dragonService.createEntityFromDTO(dragonDTO);
-        dragonService.createDragon(dragon, userId);
+        System.out.println("user id: " + userId + ", username: " + username);
+
+        Dragon dragon = dragonService.createDragon(
+                dragonService.createEntityFromDTO(dragonDTO),
+                userId
+        );
 
         System.out.println("Successfully created dragon");
 
         DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 
         return Response.ok().entity(
-                new ResponseEntity(ResponseStatus.SUCCESS,"Successfully created dragon", null)
+                new ResponseEntity(ResponseStatus.SUCCESS,"Successfully created dragon", dragon)
         ).build();
     }
 
@@ -176,6 +178,80 @@ public class DragonController {
                     new ResponseEntity(ResponseStatus.ERROR, "Dragons belong to user not found", null)
             ).build();
         }
+    }
+
+    // ---------------- вспомогательные функции
+
+    @GET
+    @Path("/coordinates")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCoordinates() {
+
+        List<Coordinates> coordinates = dragonService.getCoordinates();
+        ArrayList<String> result = new ArrayList<>();
+
+        for (Coordinates coordinate : coordinates) {
+            result.add(coordinate.toString());
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", result)
+        ).build();
+    }
+
+    @GET
+    @Path("/caves")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDragonCave() {
+
+        List<DragonCave> dragonCaves = dragonService.getDragonCave();
+        ArrayList<String> result = new ArrayList<>();
+
+        for (DragonCave cave : dragonCaves) {
+            result.add(cave.toString());
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", result)
+        ).build();
+    }
+
+    @GET
+    @Path("/persons")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getPerson() {
+
+        List<Person> persons = dragonService.getPerson();
+        ArrayList<String> result = new ArrayList<>();
+
+        for (Person person : persons) {
+            result.add(person.toString());
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", result)
+        ).build();
+    }
+
+    @GET
+    @Path("/heads")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDragonHead() {
+
+        List<DragonHead> dragonHeads = dragonService.getDragonHead();
+        ArrayList<String> result = new ArrayList<>();
+
+        for (DragonHead head : dragonHeads) {
+            result.add(head.toString());
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", result)
+        ).build();
     }
 
     // ---------------- дополнительные функции

@@ -66,4 +66,9 @@ public class Person {
             return "{}";
         }
     }
+
+    @Override
+    public String toString() {
+        return (id + ". name: " + name + ", eyes:" + eyeColor + ", hair: " + hairColor + ", location: " + location + ", birthday: " + birthday + ", height: " + height);
+    }
 }
