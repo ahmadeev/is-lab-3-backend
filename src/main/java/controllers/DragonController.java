@@ -192,7 +192,7 @@ public class DragonController {
         ArrayList<String> result = new ArrayList<>();
 
         for (Coordinates coordinate : coordinates) {
-            result.add(coordinate.toString());
+            result.add(coordinate.toJson());
         }
 
         return Response.status(Response.Status.OK).entity(
@@ -210,7 +210,7 @@ public class DragonController {
         ArrayList<String> result = new ArrayList<>();
 
         for (DragonCave cave : dragonCaves) {
-            result.add(cave.toString());
+            result.add(cave.toJson());
         }
 
         return Response.status(Response.Status.OK).entity(
@@ -228,7 +228,7 @@ public class DragonController {
         ArrayList<String> result = new ArrayList<>();
 
         for (Person person : persons) {
-            result.add(person.toString());
+            result.add(person.toJson());
         }
 
         return Response.status(Response.Status.OK).entity(
@@ -246,7 +246,7 @@ public class DragonController {
         ArrayList<String> result = new ArrayList<>();
 
         for (DragonHead head : dragonHeads) {
-            result.add(head.toString());
+            result.add(head.toJson());
         }
 
         return Response.status(Response.Status.OK).entity(

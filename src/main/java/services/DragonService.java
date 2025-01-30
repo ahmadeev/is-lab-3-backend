@@ -164,6 +164,10 @@ public class DragonService {
         return em.createQuery("SELECT e FROM DragonHead e", DragonHead.class).getResultList();
     }
 
+    public Object executeNativeQuery(String query) {
+        return em.createNativeQuery(query).executeUpdate();
+    }
+
     public Dragon createEntityFromDTO(DragonDTO dto) {
         var coordinates = dto.getCoordinates();
         var cave = dto.getCave();
