@@ -2,6 +2,7 @@ package dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.ws.rs.DefaultValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,8 @@ import objects.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DragonDTO {
+    @DefaultValue(value="-1")
+    private long id;
     @NotNull
     private String name; //Поле не может быть null, Строка не может быть пустой
     @NotNull

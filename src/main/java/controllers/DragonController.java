@@ -50,7 +50,7 @@ public class DragonController {
         System.out.println("user id: " + userId + ", username: " + username);
 
         Dragon dragon = dragonService.createDragon(
-                dragonService.createEntityFromDTO(dragonDTO),
+                dragonDTO,
                 userId
         );
 

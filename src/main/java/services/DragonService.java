@@ -13,7 +13,6 @@ import jakarta.persistence.Query;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Named(value = "mainService")
 @ApplicationScoped
@@ -28,8 +27,63 @@ public class DragonService {
     }
 
     @Transactional
-    public Dragon createDragon(Dragon dragon, long userId) {
+    public Dragon createDragon(DragonDTO dto, long userId) {
+
+        Dragon dragon = createEntityFromDTO(dto);
+
+        // можно проверять и на null, но смысла мало
+        if (dto.getCoordinates().getId() != -1) {
+            Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
+
+            if (detachedCoordinates == null) return null;
+
+            Coordinates coordinates = em.merge(detachedCoordinates);
+
+            dragon.setCoordinates(coordinates);
+        }
+
+        if (dto.getCave().getId() != -1) {
+            DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
+
+            if (detachedDragonCave == null) return null;
+
+            DragonCave dragonCave = em.merge(detachedDragonCave);
+
+            dragon.setCave(dragonCave);
+        }
+
+        if (dto.getKiller().getId() != -1) {
+            Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
+
+            if (detachedPerson == null) return null;
+
+            Person person = em.merge(detachedPerson);
+
+            dragon.setKiller(person);
+        }
+
+        if (dto.getKiller().getLocation().getId() != -1) {
+            Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
+
+            if (detachedLocation == null) return null;
+
+            Location location = em.merge(detachedLocation);
+
+            dragon.getKiller().setLocation(location);
+        }
+
+        if (dto.getHead().getId() != -1) {
+            DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
+
+            if (detachedDragonHead == null) return null;
+
+            DragonHead dragonHead = em.merge(detachedDragonHead);
+
+            dragon.setHead(dragonHead);
+        }
+
         dragon.setOwnerId(userId);
+        System.out.println(dragon.toJson());
         em.persist(dragon);
         return dragon;
     }
@@ -103,27 +157,66 @@ public class DragonService {
 
         // Выполнение запроса
         return query.getResultList();
-
-//        return em.createQuery("SELECT i FROM Dragon i", Dragon.class)
-//                .setFirstResult(page * size)
-//                .setMaxResults(size)
-//                .getResultList();
     }
 
     //  пока не готово
     @Transactional
-    public boolean updateDragonById(long id, long userId, DragonDTO dragonDTO) {
+    public boolean updateDragonById(long id, long userId, DragonDTO dto) {
         Dragon dragon = em.find(Dragon.class, id);
 
-        if (dragon == null) return false;
-        if (dragon.getOwnerId() != userId) return false;
+        // можно проверять и на null, но смысла мало
+        // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
+        // 2) апдейтим новыми значениями на тот же айди
+        if (dto.getCoordinates().getId() != -1) {
+            Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
+            Coordinates coordinates = em.merge(detachedCoordinates);
+            dragon.setCoordinates(coordinates);
+        } else {
+            dragon.getCoordinates().setX(dto.getCoordinates().getX());
+            dragon.getCoordinates().setY(dto.getCoordinates().getY());
+        }
 
-        // Обновление полей
-        dragon.setName(dragonDTO.getName());
-        dragon.setAge(dragonDTO.getAge());
-        dragon.setWingspan(dragonDTO.getWingspan());
-        dragon.setDescription(dragonDTO.getDescription());
+        if (dto.getCave().getId() != -1) {
+            DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
+            DragonCave dragonCave = em.merge(detachedDragonCave);
+            dragon.setCave(dragonCave);
+        } else {
+            dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+        }
 
+        if (dto.getKiller().getId() != -1) {
+            Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
+            Person person = em.merge(detachedPerson);
+            dragon.setKiller(person);
+        } {
+            dragon.getKiller().setName(dto.getKiller().getName());
+            dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
+            dragon.getKiller().setHairColor(dto.getKiller().getHairColor());
+            // намеренно упускаем Location (обновим ниже)
+            dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
+            dragon.getKiller().setHeight(dto.getKiller().getHeight());
+        }
+
+        if (dto.getKiller().getLocation().getId() != -1) {
+            Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
+            Location location = em.merge(detachedLocation);
+            dragon.getKiller().setLocation(location);
+        } else {
+            dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
+            dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
+            dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
+        }
+
+        if (dto.getHead().getId() != -1) {
+            DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
+            DragonHead dragonHead = em.merge(detachedDragonHead);
+            dragon.setHead(dragonHead);
+        } else {
+            dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+        }
+
+        dragon.setOwnerId(userId);
+        em.merge(dragon);
         return true;
     }
 
@@ -177,6 +270,7 @@ public class DragonService {
 
         var killer = dto.getKiller();
 
+        // TODO: может быть киллер пустым??
         if (killer == null) return null;
 
         var location = killer.getLocation();

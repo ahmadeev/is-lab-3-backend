@@ -5,6 +5,7 @@ import jakarta.json.bind.JsonbBuilder;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.time.ZonedDateTime;
 @Table(name = "dragon")
 @Getter @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Dragon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

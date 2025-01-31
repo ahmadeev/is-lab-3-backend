@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.ws.rs.DefaultValue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,8 @@ import objects.Color;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PersonDTO {
+    @DefaultValue(value="-1")
+    private long id;
     @NotNull
     @NotEmpty
     private String name; //Поле не может быть null, Строка не может быть пустой

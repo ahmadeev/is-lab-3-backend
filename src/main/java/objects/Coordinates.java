@@ -4,6 +4,7 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.Setter;
 @Table(name = "coordinates")
 @Getter @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
