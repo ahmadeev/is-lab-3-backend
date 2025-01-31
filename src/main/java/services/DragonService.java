@@ -167,55 +167,62 @@ public class DragonService {
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
         // 2) апдейтим новыми значениями на тот же айди
-        if (dto.getCoordinates().getId() != -1) {
-            Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
-            Coordinates coordinates = em.merge(detachedCoordinates);
-            dragon.setCoordinates(coordinates);
-        } else {
-            dragon.getCoordinates().setX(dto.getCoordinates().getX());
-            dragon.getCoordinates().setY(dto.getCoordinates().getY());
-        }
 
-        if (dto.getCave().getId() != -1) {
-            DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
-            DragonCave dragonCave = em.merge(detachedDragonCave);
-            dragon.setCave(dragonCave);
-        } else {
-            dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
-        }
+        // проблема в том, что изначально (1) для замены одного объекта другим,
+        // а (2) для обновления полей того же объекта
+        // TODO: ??? выполнение блоков последовательно может привести к перезаписи полей чужих объектов
 
-        if (dto.getKiller().getId() != -1) {
-            Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
-            Person person = em.merge(detachedPerson);
-            dragon.setKiller(person);
-        } {
-            dragon.getKiller().setName(dto.getKiller().getName());
-            dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
-            dragon.getKiller().setHairColor(dto.getKiller().getHairColor());
-            // намеренно упускаем Location (обновим ниже)
-            dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
-            dragon.getKiller().setHeight(dto.getKiller().getHeight());
-        }
+        // --- 1
+        Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
+        Coordinates coordinates = em.merge(detachedCoordinates);
+        dragon.setCoordinates(coordinates);
+        // --- 2
+        dragon.getCoordinates().setX(dto.getCoordinates().getX());
+        dragon.getCoordinates().setY(dto.getCoordinates().getY());
 
-        if (dto.getKiller().getLocation().getId() != -1) {
-            Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
-            Location location = em.merge(detachedLocation);
-            dragon.getKiller().setLocation(location);
-        } else {
-            dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
-            dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
-            dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
-        }
+        // --- 1
+        DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
+        DragonCave dragonCave = em.merge(detachedDragonCave);
+        dragon.setCave(dragonCave);
+        // --- 2
+        dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
 
-        if (dto.getHead().getId() != -1) {
-            DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
-            DragonHead dragonHead = em.merge(detachedDragonHead);
-            dragon.setHead(dragonHead);
-        } else {
-            dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
-        }
+        // --- 1
+        Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
+        Person person = em.merge(detachedPerson);
+        dragon.setKiller(person);
+        // --- 2
+        dragon.getKiller().setName(dto.getKiller().getName());
+        dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
+        dragon.getKiller().setHairColor(dto.getKiller().getHairColor());
+        // намеренно упускаем Location (обновим ниже)
+        dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
+        dragon.getKiller().setHeight(dto.getKiller().getHeight());
 
+        // --- 1
+        Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
+        Location location = em.merge(detachedLocation);
+        dragon.getKiller().setLocation(location);
+        // --- 2
+        dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
+        dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
+        dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
+
+        // --- 1
+        DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
+        DragonHead dragonHead = em.merge(detachedDragonHead);
+        dragon.setHead(dragonHead);
+        // --- 2
+        dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+
+        // обновление обычных полей дракона
+        dragon.setName(dto.getName());
+        dragon.setAge(dto.getAge());
+        dragon.setDescription(dto.getDescription());
+        dragon.setWingspan(dto.getWingspan());
+        dragon.setCharacter(dto.getCharacter());
         dragon.setOwnerId(userId);
+
         em.merge(dragon);
         return true;
     }
