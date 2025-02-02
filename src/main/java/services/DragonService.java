@@ -95,6 +95,7 @@ public class DragonService {
 
     @Transactional
     public List<Dragon> getDragons(int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+        // в будущем необходимо добавить id и ownerId
         Map<String, String> columnNames = Map.ofEntries(
                 Map.entry("Name", "d.name"),
                 Map.entry("Coordinates: x", "c.x"),
@@ -163,6 +164,10 @@ public class DragonService {
     @Transactional
     public boolean updateDragonById(long id, long userId, DragonDTO dto) {
         Dragon dragon = em.find(Dragon.class, id);
+
+        // TODO: нужна более глубокая проверка ownerId
+        if (dragon == null) return false;
+        if (dragon.getOwnerId() != userId) return false;
 
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый

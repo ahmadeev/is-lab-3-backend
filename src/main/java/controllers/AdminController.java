@@ -1,6 +1,7 @@
 package controllers;
 
 import auth.AdminRequest;
+import auth.AdminRequestDTO;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -47,9 +48,15 @@ public class AdminController {
     @Path("/users")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserList(@QueryParam("page") @DefaultValue("0") int page,
-                               @QueryParam("size") @DefaultValue("10") int size) {
-        List<AdminRequest> adminRequests = adminService.getUserList(page, size);
+    public Response getUserList(
+            @QueryParam("page") @DefaultValue("0") int page,
+            @QueryParam("pageSize") @DefaultValue("10") int pageSize,
+            @QueryParam("filterValue") @DefaultValue("") String filterValue,
+            @QueryParam("filterCol") @DefaultValue("") String filterCol,
+            @QueryParam("sortBy") @DefaultValue("id") String sortBy,
+            @QueryParam("sortDir") @DefaultValue("ASC") String sortDir
+    ) {
+        List<AdminRequestDTO> adminRequests = adminService.getUserList(page, pageSize, filterValue, filterCol, sortBy, sortDir);
 
         return Response.ok().entity(
                 new ResponseEntity(ResponseStatus.SUCCESS, "", adminRequests)

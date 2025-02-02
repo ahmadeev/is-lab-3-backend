@@ -1,9 +1,6 @@
 package services;
 
-import auth.AdminRequest;
-import auth.Roles;
-import auth.User;
-import auth.UserDTO;
+import auth.*;
 import dto.DragonDTO;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -11,10 +8,12 @@ import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
 import objects.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Named(value = "adminService")
 @ApplicationScoped
@@ -50,11 +49,47 @@ public class AdminService {
     }
 
     @Transactional
-    public List<AdminRequest> getUserList(int page, int size) {
-        return em.createQuery("SELECT i FROM AdminRequest i", AdminRequest.class)
-                .setFirstResult(page * size)
-                .setMaxResults(size)
-                .getResultList();
+    public List<AdminRequestDTO> getUserList(int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+        // в будущем необходимо добавить id и ownerId
+        Map<String, String> columnNames = Map.ofEntries(
+                Map.entry("Name", "ar.name")
+        );
+
+        // Базовый JPQL-запрос
+        String baseQuery = """
+            SELECT new auth.AdminRequestDTO(ar.id, ar.name)
+            FROM AdminRequest ar
+            WHERE 1=1
+        """;
+
+        // Фильтрация
+        boolean hasFilter = false;
+        if (filterCol != null && !filterCol.isEmpty() && filterValue != null && !filterValue.isEmpty()) {
+            baseQuery += " AND LOWER(" + columnNames.get(filterCol) + ") LIKE LOWER(:filterValue)";
+            hasFilter = true;
+        }
+
+        // Сортировка
+        if (sortDir != null && !sortDir.isEmpty()) {
+            baseQuery += " ORDER BY " + columnNames.getOrDefault(sortBy, "ar.id") + " " + sortDir.toUpperCase();
+        } else {
+            baseQuery += " ORDER BY " + columnNames.getOrDefault(sortBy, "ar.id") + "ASC";
+        }
+
+        // Создание TypedQuery
+        TypedQuery<AdminRequestDTO> query = em.createQuery(baseQuery, AdminRequestDTO.class);
+
+        // Применение фильтра
+        if (hasFilter) {
+            query.setParameter("filterValue", "%" + filterValue + "%");
+        }
+
+        // Пагинация
+        query.setFirstResult(page * pageSize);
+        query.setMaxResults(pageSize);
+
+        // Выполнение запроса
+        return query.getResultList();
     }
 
     @Transactional
