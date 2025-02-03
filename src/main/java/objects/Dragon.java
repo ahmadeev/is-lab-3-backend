@@ -27,7 +27,7 @@ public class Dragon {
     @Column(name = "name")
     private String name; //Поле не может быть null, Строка не может быть пустой
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "coordinates_id", referencedColumnName = "id")
     @NotNull(message = "Поле класса Coordinates не должно быть пустым")
     private Coordinates coordinates; //Поле не может быть null
@@ -36,12 +36,12 @@ public class Dragon {
     @Column(name = "creation_date")
     private java.time.ZonedDateTime creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "dragon_cave_id", referencedColumnName = "id")
     @NotNull(message = "Поле класса DragonCave не должно быть пустым")
     private DragonCave cave; //Поле не может быть null
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "person_id", referencedColumnName = "id")
     private Person killer; //Поле может быть null
 
@@ -61,7 +61,7 @@ public class Dragon {
     @Column(name = "character")
     private DragonCharacter character; //Поле может быть null
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "dragon_head_id", referencedColumnName = "id")
     private DragonHead head;
 

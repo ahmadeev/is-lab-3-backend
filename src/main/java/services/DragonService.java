@@ -1,15 +1,13 @@
 package services;
 
-import dto.DragonDTO;
+import dto.*;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import objects.*;
-import jakarta.persistence.Query;
+import utils.PairReturnBooleanString;
 
 import java.util.List;
 import java.util.Map;
@@ -174,6 +172,7 @@ public class DragonService {
     @Transactional
     public boolean updateDragonById(long id, long userId, DragonDTO dto) {
         Dragon dragon = em.find(Dragon.class, id);
+        Dragon dragonToMerge = createEntityFromDTOAllArgs(dto);
 
         // TODO: нужна более глубокая проверка ownerId
         if (dragon == null) return false;
@@ -187,48 +186,95 @@ public class DragonService {
         // а (2) для обновления полей того же объекта
         // TODO: ??? выполнение блоков последовательно может привести к перезаписи полей чужих объектов
 
-        // --- 1
-        Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
-        Coordinates coordinates = em.merge(detachedCoordinates);
-        dragon.setCoordinates(coordinates);
-        // --- 2
-        dragon.getCoordinates().setX(dto.getCoordinates().getX());
-        dragon.getCoordinates().setY(dto.getCoordinates().getY());
+        System.out.println("=============== coordinates : " + dragon.getCoordinates().equals(dragonToMerge.getCoordinates()));
 
-        // --- 1
-        DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
-        DragonCave dragonCave = em.merge(detachedDragonCave);
-        dragon.setCave(dragonCave);
-        // --- 2
-        dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+        // айди пользователя получен из jwt
+        // один и тот же объект (айди совпадают:
+        //     один айди получен от пользователя из path (какой?),
+        //     второй тоже -- но иначе -- отправлен в теле запроса на основании выбора объекта (чем?))
+        // разные наборы полей (существующий объект в базе (какие?) и запрос на изменение (чем?))
+        if (dragon.getCoordinates().getId() == dragonToMerge.getCoordinates().getId()
+                && !(dragon.getCoordinates().equals(dragonToMerge.getCoordinates()))) {
+            if (dragon.getCoordinates().getOwnerId() != userId) return false;
+            // --- 2 --- обновляем предложенными изменениями
+            dragon.getCoordinates().setX(dto.getCoordinates().getX());
+            dragon.getCoordinates().setY(dto.getCoordinates().getY());
+        } else if (dragon.getCoordinates().getId() != dragonToMerge.getCoordinates().getId()) {
+            if (dragon.getCoordinates().getOwnerId() != userId) return false;
+            // --- 1 --- заменяем объект полученным из бд с помощью второго айди
+            Coordinates coordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
+            dragon.setCoordinates(coordinates);
+        }
 
-        // --- 1
-        Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
-        Person person = em.merge(detachedPerson);
-        dragon.setKiller(person);
-        // --- 2
-        dragon.getKiller().setName(dto.getKiller().getName());
-        dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
-        dragon.getKiller().setHairColor(dto.getKiller().getHairColor());
-        // намеренно упускаем Location (обновим ниже)
-        dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
-        dragon.getKiller().setHeight(dto.getKiller().getHeight());
+        System.out.println("=============== cave ------ : " + dragon.getCave().equals(dragonToMerge.getCave()));
 
-        // --- 1
-        Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
-        Location location = em.merge(detachedLocation);
-        dragon.getKiller().setLocation(location);
-        // --- 2
-        dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
-        dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
-        dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
+        if (dragon.getCave().getId() == dragonToMerge.getCave().getId()
+                && !(dragon.getCave().equals(dragonToMerge.getCave()))) {
+            if (dragon.getCave().getOwnerId() != userId) return false;
+            // --- 2
+            dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+        } else if (dragon.getCave().getId() != dragonToMerge.getCave().getId()) {
+            if (dragon.getCave().getOwnerId() != userId) return false;
+            // --- 1
+            DragonCave dragonCave = em.find(DragonCave.class, dto.getCave().getId());
+            dragon.setCave(dragonCave);
+        }
 
-        // --- 1
-        DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
-        DragonHead dragonHead = em.merge(detachedDragonHead);
-        dragon.setHead(dragonHead);
-        // --- 2
-        dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+        System.out.println("=============== killer ---- : " + dragon.getKiller().equals(dragonToMerge.getKiller()));
+
+        if (dragonToMerge.getKiller() == null) {
+            dragon.setKiller(null);
+        } else {
+            if (dragon.getKiller().getId() == dragonToMerge.getKiller().getId()
+                    && !(dragon.getKiller().equals(dragonToMerge.getKiller()))) {
+                if (dragon.getKiller().getOwnerId() != userId) return false;
+                // --- 2
+                dragon.getKiller().setName(dto.getKiller().getName());
+                dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
+                dragon.getKiller().setHairColor(dto.getKiller().getHairColor());
+                // намеренно упускаем Location (обновим ниже)
+                dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
+                dragon.getKiller().setHeight(dto.getKiller().getHeight());
+            } else if (dragon.getKiller().getId() != dragonToMerge.getKiller().getId()) {
+                if (dragon.getKiller().getOwnerId() != userId) return false;
+                // --- 1
+                Person person = em.find(Person.class, dto.getKiller().getId());
+                dragon.setKiller(person);
+            }
+        }
+
+        if (dragon.getKiller() != null) {
+            System.out.println("=============== location -- : " + dragon.getKiller().getLocation().equals(dragonToMerge.getKiller().getLocation()));
+
+            if (dragon.getKiller().getLocation().getId() == dragonToMerge.getKiller().getLocation().getId()
+                    && !(dragon.getKiller().getLocation().equals(dragonToMerge.getKiller().getLocation()))) {
+                if (dragon.getKiller().getLocation().getOwnerId() != userId) return false;
+                // --- 2
+                dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
+                dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
+                dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
+            } else if (dragon.getKiller().getLocation().getId() != dragonToMerge.getKiller().getLocation().getId()) {
+                if (dragon.getKiller().getLocation().getOwnerId() != userId) return false;
+                // --- 1
+                Location location = em.find(Location.class, dto.getKiller().getLocation().getId());
+                dragon.getKiller().setLocation(location);
+            }
+        }
+
+        System.out.println("=============== head ------ : " + dragon.getHead().equals(dragonToMerge.getHead()));
+
+        if (dragon.getHead().getId() == dragonToMerge.getHead().getId()
+                && !(dragon.getHead().equals(dragonToMerge.getHead()))) {
+            if (dragon.getHead().getOwnerId() != userId) return false;
+            // --- 2
+            dragon.getHead().setEyesCount(dto.getHead().getEyesCount());
+            dragon.getHead().setToothCount(dto.getHead().getToothCount());
+        } else if (dragon.getHead().getId() != dragonToMerge.getHead().getId()) {
+            if (dragon.getHead().getOwnerId() != userId) return false;
+            // --- 1
+            DragonHead dragonHead = em.find(DragonHead.class, dto.getHead().getId());
+            dragon.setHead(dragonHead);
+        }
 
         // обновление обычных полей дракона
         dragon.setName(dto.getName());
@@ -243,38 +289,27 @@ public class DragonService {
     }
 
     @Transactional
-    public boolean deleteDragonById(long id, long userId) {
+    public PairReturnBooleanString deleteDragonById(long id, long userId) {
         Dragon dragon = em.find(Dragon.class, id);
 
         if (dragon == null) {
             System.out.println("dragon does not exist");
-            return false;
+            return new PairReturnBooleanString(false, "Dragon does not exist.");
         }
         if (dragon.getOwnerId() != userId) {
             System.out.println("you are not allowed to delete this dragon");
-            return false;
+            return new PairReturnBooleanString(
+                    false,
+                    "You are not allowed to delete this dragon. You are not an owner."
+            );
         }
 
         // проверять по собственным id вложенных объектов и проверять, есть ли dragon с такими же id вложенных объектов
+        // ээээээээээээ ???
 
-//        String sql = """
-//        DELETE FROM dragon WHERE id = :dragonId AND NOT EXISTS (
-//            SELECT 1 FROM dragon d
-//            WHERE (d.dragon_head_id = (SELECT dragon_head_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
-//                OR d.coordinates_id = (SELECT coordinates_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
-//                OR d.dragon_cave_id = (SELECT dragon_cave_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
-//                OR d.person_id = (SELECT person_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId))
-//              AND d.id != :dragonId
-//        )
-//        """;
-//
-//        int deleted = em.createNativeQuery(sql)
-//                .setParameter("dragonId", id)
-//                .executeUpdate();
-//        return deleted > 0;
+        em.remove(dragon);
 
-         em.remove(dragon);
-         return true;
+        return new PairReturnBooleanString(true, "Successfully deleted dragon.");
     }
 
     @Transactional
@@ -309,18 +344,19 @@ public class DragonService {
     }
 
     public Dragon createEntityFromDTO(DragonDTO dto) {
-        var coordinates = dto.getCoordinates();
-        var cave = dto.getCave();
-        var head = dto.getHead();
+        CoordinatesDTO coordinates = dto.getCoordinates();
+        DragonCaveDTO cave = dto.getCave();
+        DragonHeadDTO head = dto.getHead();
 
         if (coordinates == null || cave == null) return null;
 
-        var killer = dto.getKiller();
+        PersonDTO killer = dto.getKiller();
+        LocationDTO location = null;
 
-        // TODO: может быть киллер пустым??
-        if (killer == null) return null;
-
-        var location = killer.getLocation();
+        if (killer != null) {
+            location = killer.getLocation();
+            if (location == null) return null;
+        }
 
         return new Dragon(
                 // без id, creationTime и ownerId
@@ -332,7 +368,7 @@ public class DragonService {
                 new DragonCave(
                         cave.getNumberOfTreasures()
                 ),
-                new Person(
+                killer == null ? null : new Person(
                         killer.getName(),
                         killer.getEyeColor(),
                         killer.getHairColor(),
@@ -352,6 +388,66 @@ public class DragonService {
                         head.getEyesCount(),
                         head.getToothCount()
                 )
+        );
+    }
+
+    public Dragon createEntityFromDTOAllArgs(DragonDTO dto) {
+        CoordinatesDTO coordinates = dto.getCoordinates();
+        DragonCaveDTO cave = dto.getCave();
+        DragonHeadDTO head = dto.getHead();
+
+        if (coordinates == null || cave == null) return null;
+
+        PersonDTO killer = dto.getKiller();
+        LocationDTO location = null;
+
+        if (killer != null) {
+            location = killer.getLocation();
+            if (location == null) return null;
+        }
+
+        return new Dragon(
+                dto.getId(),
+                dto.getName(),
+                new Coordinates(
+                        coordinates.getId(),
+                        coordinates.getX(),
+                        coordinates.getY(),
+                        coordinates.getOwnerId()
+                ),
+                dto.getCreationDate(),
+                new DragonCave(
+                        cave.getId(),
+                        cave.getNumberOfTreasures(),
+                        cave.getOwnerId()
+                ),
+                killer == null ? null : new Person(
+                        killer.getId(),
+                        killer.getName(),
+                        killer.getEyeColor(),
+                        killer.getHairColor(),
+                        new Location(
+                                location.getId(),
+                                location.getX(),
+                                location.getY(),
+                                location.getZ(),
+                                location.getOwnerId()
+                        ),
+                        killer.getBirthday(),
+                        killer.getHeight(),
+                        killer.getOwnerId()
+                ),
+                dto.getAge(),
+                dto.getDescription(),
+                dto.getWingspan(),
+                dto.getCharacter(),
+                new DragonHead(
+                        head.getId(),
+                        head.getEyesCount(),
+                        head.getToothCount(),
+                        head.getOwnerId()
+                ),
+                dto.getOwnerId()
         );
     }
 

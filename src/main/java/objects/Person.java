@@ -39,7 +39,7 @@ public class Person {
     @Column(name = "hair_color")
     private Color hairColor; //Поле может быть null
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "location_id", referencedColumnName = "id")
     @NotNull(message = "Поле location не должно быть пустым")
     private Location location; //Поле не может быть null

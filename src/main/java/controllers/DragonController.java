@@ -17,6 +17,7 @@ import responses.ResponseStatus;
 import jakarta.inject.Inject;
 import services.DragonService;
 import utils.DragonWebSocket;
+import utils.PairReturnBooleanString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,17 +139,26 @@ public class DragonController {
         long userId = authService.getUserByName(username).getId();
         System.out.println(userId);
 
-        boolean isDeleted = dragonService.deleteDragonById(id, userId);
+        // узнал я, что ошибка летит после неудачного каскадного удаления, поэтому теперь так :с
+        PairReturnBooleanString result;
+        try {
+            result = dragonService.deleteDragonById(id, userId);
+        } catch (Exception e) {
+            result = new PairReturnBooleanString(
+                    false,
+                    "You are not allowed to delete this dragon. Dragon is linked to another dragon(s)."
+            );
+        }
 
         DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 
-        if (isDeleted) {
+        if (result.isFirst()) {
             return Response.noContent().entity(
-                    new ResponseEntity(ResponseStatus.SUCCESS, "Successfully deleted dragon", null)
+                    new ResponseEntity(ResponseStatus.SUCCESS, result.getSecond(), null)
             ).build(); // Статус 204, если удаление успешно
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(
-                    new ResponseEntity(ResponseStatus.ERROR, "Dragon not found", null)
+                    new ResponseEntity(ResponseStatus.ERROR, result.getSecond(), null)
             ).build(); // Статус 404, если дракон не найден
         }
     }
