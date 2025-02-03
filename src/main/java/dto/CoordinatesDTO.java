@@ -15,4 +15,9 @@ public class CoordinatesDTO {
     @DecimalMin(value = "-596", inclusive = false)
     private long x; //Значение поля должно быть больше -596
     private int y;
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }

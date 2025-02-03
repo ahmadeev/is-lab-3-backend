@@ -40,6 +40,8 @@ public class DragonService {
             Coordinates coordinates = em.merge(detachedCoordinates);
 
             dragon.setCoordinates(coordinates);
+        } else if (dto.getCoordinates().getId() == -1) {
+            dragon.getCoordinates().setOwnerId(userId);
         }
 
         if (dto.getCave().getId() != -1) {
@@ -50,6 +52,8 @@ public class DragonService {
             DragonCave dragonCave = em.merge(detachedDragonCave);
 
             dragon.setCave(dragonCave);
+        } else if (dto.getCave().getId() == -1) {
+            dragon.getCave().setOwnerId(userId);
         }
 
         if (dto.getKiller().getId() != -1) {
@@ -60,6 +64,8 @@ public class DragonService {
             Person person = em.merge(detachedPerson);
 
             dragon.setKiller(person);
+        } else if (dto.getKiller().getId() == -1) {
+            dragon.getKiller().setOwnerId(userId);
         }
 
         if (dto.getKiller().getLocation().getId() != -1) {
@@ -70,6 +76,8 @@ public class DragonService {
             Location location = em.merge(detachedLocation);
 
             dragon.getKiller().setLocation(location);
+        } else if (dto.getKiller().getLocation().getId() == -1) {
+            dragon.getKiller().getLocation().setOwnerId(userId);
         }
 
         if (dto.getHead().getId() != -1) {
@@ -80,6 +88,8 @@ public class DragonService {
             DragonHead dragonHead = em.merge(detachedDragonHead);
 
             dragon.setHead(dragonHead);
+        } else if (dto.getHead().getId() == -1) {
+            dragon.getHead().setOwnerId(userId);
         }
 
         dragon.setOwnerId(userId);

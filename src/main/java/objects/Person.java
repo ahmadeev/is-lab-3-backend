@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "person")
@@ -51,6 +52,23 @@ public class Person {
     @Column(name = "height")
     private Integer height; //Поле может быть null, Значение поля должно быть больше 0
 
+    // ------------ добавленные
+
+    @Column(name = "owner_id")
+    private long ownerId;
+
+    // ------------
+
+    public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height, long ownerId) {
+        this.name = name;
+        this.eyeColor = eyeColor;
+        this.hairColor = hairColor;
+        this.location = location;
+        this.birthday = birthday;
+        this.height = height;
+        this.ownerId = ownerId;
+    }
+
     public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height) {
         this.name = name;
         this.eyeColor = eyeColor;
@@ -72,5 +90,24 @@ public class Person {
     @Override
     public String toString() {
         return (id + ". name: " + name + ", eyes:" + eyeColor + ", hair: " + hairColor + ", location: " + location + ", birthday: " + birthday + ", height: " + height);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return ownerId == person.ownerId &&
+                Objects.equals(name, person.name) &&
+                eyeColor == person.eyeColor &&
+                hairColor == person.hairColor &&
+                Objects.equals(location, person.location) &&
+                Objects.equals(birthday, person.birthday) &&
+                Objects.equals(height, person.height);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, eyeColor, hairColor, location, birthday, height, ownerId);
     }
 }

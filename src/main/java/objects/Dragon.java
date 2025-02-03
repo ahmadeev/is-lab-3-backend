@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "dragon")
@@ -64,10 +65,12 @@ public class Dragon {
     @JoinColumn(name = "dragon_head_id", referencedColumnName = "id")
     private DragonHead head;
 
-    // ------------
+    // ------------ добавленные
 
     @Column(name = "owner_id")
     private long ownerId;
+
+    // ------------
 
     public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, long ownerId) {
         this.name = name;
@@ -106,5 +109,29 @@ public class Dragon {
             e.printStackTrace();
             return "{}";
         }
+    }
+
+    // toString()
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Dragon dragon = (Dragon) o;
+        return ownerId == dragon.ownerId &&
+                age == dragon.age &&
+                Objects.equals(name, dragon.name) &&
+                Objects.equals(coordinates, dragon.coordinates) &&
+                Objects.equals(cave, dragon.cave) &&
+                Objects.equals(killer, dragon.killer) &&
+                Objects.equals(description, dragon.description) &&
+                Objects.equals(wingspan, dragon.wingspan) &&
+                character == dragon.character &&
+                Objects.equals(head, dragon.head);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, coordinates, cave, killer, age, description, wingspan, character, head, ownerId);
     }
 }

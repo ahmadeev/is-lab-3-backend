@@ -15,4 +15,9 @@ public class DragonHeadDTO {
     private float eyesCount;
     @NotNull
     private Double toothCount; //Поле не может быть null
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }

@@ -16,4 +16,9 @@ public class LocationDTO {
     @NotNull
     private Integer y; //Поле не может быть null
     private int z;
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }

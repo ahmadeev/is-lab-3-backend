@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "dragon_head")
 @Getter @Setter
@@ -25,6 +27,19 @@ public class DragonHead {
     @NotNull(message = "Поле tooth_count не должно быть пустым")
     @Column(name = "tooth_count")
     private Double toothCount; //Поле не может быть null
+
+    // ------------ добавленные
+
+    @Column(name = "owner_id")
+    private long ownerId;
+
+    // ------------
+
+    public DragonHead(float eyesCount, Double toothCount, long ownerId) {
+        this.eyesCount = eyesCount;
+        this.toothCount = toothCount;
+        this.ownerId = ownerId;
+    }
 
     public DragonHead(float eyesCount, Double toothCount) {
         this.eyesCount = eyesCount;
@@ -43,5 +58,20 @@ public class DragonHead {
     @Override
     public String toString() {
         return (id + ". eyes: " + eyesCount + ", tooth: " + toothCount);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DragonHead that = (DragonHead) o;
+        return Float.compare(that.eyesCount, eyesCount) == 0 &&
+                ownerId == that.ownerId &&
+                Objects.equals(toothCount, that.toothCount);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eyesCount, toothCount, ownerId);
     }
 }

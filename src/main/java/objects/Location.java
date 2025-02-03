@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "location")
 @Getter @Setter
@@ -29,6 +31,20 @@ public class Location {
     @Column(name = "z")
     private int z;
 
+    // ------------ добавленные
+
+    @Column(name = "owner_id")
+    private long ownerId;
+
+    // ------------
+
+    public Location(int x, Integer y, int z, long ownerId) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.ownerId = ownerId;
+    }
+
     public Location(int x, Integer y, int z) {
         this.x = x;
         this.y = y;
@@ -47,5 +63,21 @@ public class Location {
     @Override
     public String toString() {
         return (id + ". x: " + x + ", y: " + y + ", z: " + z);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Location location = (Location) o;
+        return x == location.x &&
+                z == location.z &&
+                ownerId == location.ownerId &&
+                Objects.equals(y, location.y);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, z, ownerId);
     }
 }

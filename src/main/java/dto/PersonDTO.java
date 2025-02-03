@@ -29,4 +29,9 @@ public class PersonDTO {
     private java.time.LocalDate birthday; //Поле не может быть null
     @Positive
     private Integer height; //Поле может быть null, Значение поля должно быть больше 0
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }

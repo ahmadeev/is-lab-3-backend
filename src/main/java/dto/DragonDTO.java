@@ -29,4 +29,9 @@ public class DragonDTO {
     private Long wingspan; //Значение поля должно быть больше 0, Поле не может быть null
     private DragonCharacter character; //Поле может быть null
     private DragonHeadDTO head;
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "coordinates")
 @Getter @Setter
@@ -25,6 +27,19 @@ public class Coordinates {
 
     @Column(name = "y")
     private int y;
+
+    // ------------ добавленные
+
+    @Column(name = "owner_id")
+    private long ownerId;
+
+    // ------------
+
+    public Coordinates(long x, int y, long ownerId) {
+        this.x = x;
+        this.y = y;
+        this.ownerId = ownerId;
+    }
 
     public Coordinates(long x, int y) {
         this.x = x;
@@ -43,5 +58,20 @@ public class Coordinates {
     @Override
     public String toString() {
         return (id + ". x: " + x + ", y: " + y);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Coordinates that = (Coordinates) o;
+        return x == that.x &&
+                y == that.y &&
+                ownerId == that.ownerId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y, ownerId);
     }
 }

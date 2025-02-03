@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "dragon_cave")
 @Getter @Setter
@@ -22,6 +24,18 @@ public class DragonCave {
     @Positive
     @Column(name = "number_of_treasures")
     private float numberOfTreasures; //Значение поля должно быть больше 0
+
+    // ------------ добавленные
+
+    @Column(name = "owner_id")
+    private long ownerId;
+
+    // ------------
+
+    public DragonCave(float numberOfTreasures, long ownerId) {
+        this.numberOfTreasures = numberOfTreasures;
+        this.ownerId = ownerId;
+    }
 
     public DragonCave(float numberOfTreasures) {
         this.numberOfTreasures = numberOfTreasures;
@@ -39,5 +53,19 @@ public class DragonCave {
     @Override
     public String toString() {
         return (id + ". number of treasures: " + numberOfTreasures);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DragonCave that = (DragonCave) o;
+        return Float.compare(that.numberOfTreasures, numberOfTreasures) == 0 &&
+                ownerId == that.ownerId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(numberOfTreasures, ownerId);
     }
 }

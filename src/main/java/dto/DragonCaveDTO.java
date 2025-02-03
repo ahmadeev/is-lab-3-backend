@@ -14,4 +14,9 @@ public class DragonCaveDTO {
     private long id;
     @Positive
     private float numberOfTreasures; //Значение поля должно быть больше 0
+
+    // ------------ добавленные
+
+    @DefaultValue(value="-1")
+    private long ownerId;
 }
