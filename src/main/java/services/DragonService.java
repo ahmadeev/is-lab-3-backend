@@ -236,15 +236,40 @@ public class DragonService {
     public boolean deleteDragonById(long id, long userId) {
         Dragon dragon = em.find(Dragon.class, id);
 
-        if (dragon == null) return false;
-        if (dragon.getOwnerId() != userId) return false;
+        if (dragon == null) {
+            System.out.println("dragon does not exist");
+            return false;
+        }
+        if (dragon.getOwnerId() != userId) {
+            System.out.println("you are not allowed to delete this dragon");
+            return false;
+        }
 
-        em.remove(dragon);
-        return true;
+        // проверять по собственным id вложенных объектов и проверять, есть ли dragon с такими же id вложенных объектов
+
+//        String sql = """
+//        DELETE FROM dragon WHERE id = :dragonId AND NOT EXISTS (
+//            SELECT 1 FROM dragon d
+//            WHERE (d.dragon_head_id = (SELECT dragon_head_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
+//                OR d.coordinates_id = (SELECT coordinates_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
+//                OR d.dragon_cave_id = (SELECT dragon_cave_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId)
+//                OR d.person_id = (SELECT person_id FROM dragon WHERE id = :dragonId AND ownerId != :ownerId))
+//              AND d.id != :dragonId
+//        )
+//        """;
+//
+//        int deleted = em.createNativeQuery(sql)
+//                .setParameter("dragonId", id)
+//                .executeUpdate();
+//        return deleted > 0;
+
+         em.remove(dragon);
+         return true;
     }
 
     @Transactional
     public int deleteDragons(long userId) {
+        // здесь тоже проверять
         String jpql = "DELETE FROM Dragon o WHERE o.ownerId = :userId";
         Query query = em.createQuery(jpql);
         query.setParameter("userId", userId);

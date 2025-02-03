@@ -64,6 +64,8 @@ public class Dragon {
     @JoinColumn(name = "dragon_head_id", referencedColumnName = "id")
     private DragonHead head;
 
+    // ------------
+
     @Column(name = "owner_id")
     private long ownerId;
 
