@@ -197,17 +197,12 @@ public class DragonService {
         Dragon dragon = em.find(Dragon.class, id);
         Dragon dragonToMerge = createEntityFromDTOAllArgs(dto);
 
-        // TODO: нужна более глубокая проверка ownerId
         if (dragon == null) return false;
         if (dragon.getOwnerId() != userId) return false;
 
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
         // 2) апдейтим новыми значениями на тот же айди
-
-        // проблема в том, что изначально (1) для замены одного объекта другим,
-        // а (2) для обновления полей того же объекта
-        // TODO: ??? выполнение блоков последовательно может привести к перезаписи полей чужих объектов
 
         System.out.println("=============== coordinates : " + dragon.getCoordinates().equals(dragonToMerge.getCoordinates()));
 
@@ -480,5 +475,11 @@ public class DragonService {
 
     public void fun1() {
         return;
+    }
+
+    // ---------------- вспомогательные к дополнительным
+
+    public List<Dragon> getAliveDragons() {
+        return em.createQuery("SELECT e FROM Dragon e WHERE e.killer = NULL", Dragon.class).getResultList();
     }
 }

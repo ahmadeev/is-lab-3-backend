@@ -266,9 +266,72 @@ public class DragonController {
 
     // ---------------- дополнительные функции
 
+    @DELETE
+    @Path("/fun-1")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response fun1() {
         return Response.status(Response.Status.OK).entity(
                 new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
+    }
+
+    @GET
+    @Path("/fun-2")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fun2(@QueryParam("wingspan") Long wingspan) {
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
+    }
+
+    @GET
+    @Path("/fun-3")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fun3(@QueryParam("character") DragonCharacter character) {
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
+    }
+
+    @GET
+    @Path("/fun-4")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fun4() {
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
+    }
+
+    @PUT
+    @Path("/fun-5/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response fun5(@PathParam("id") long id, @Valid DragonDTO dragonDTO) {
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+        ).build();
+    }
+
+    // ---------------- вспомогательные к дополнительным
+
+    @GET
+    @Path("/alive-dragons")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAliveDragons() {
+        List<Dragon> dragons = dragonService.getAliveDragons();
+        ArrayList<String> result = new ArrayList<>();
+
+        for (Dragon dragon : dragons) {
+            result.add(dragon.toJson());
+        }
+
+        return Response.status(Response.Status.OK).entity(
+                new ResponseEntity(ResponseStatus.SUCCESS, "", result)
         ).build();
     }
 }
