@@ -11,6 +11,7 @@ import utils.PairReturnBooleanString;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Named(value = "mainService")
 @ApplicationScoped
@@ -125,6 +126,20 @@ public class DragonService {
                 Map.entry("Head: tooth count", "dh.toothCount")
         );
 
+        // столбцы, содержащие числовые значения
+        Set<String> numericColumns = Set.of(
+                "Coordinates: x",
+                "Coordinates: y",
+                "Cave: number of treasures",
+                "Killer: Location: x",
+                "Killer: Location: y",
+                "Killer: Location: z",
+                "Killer: height",
+                "Age",
+                "Wingspan",
+                "Head: eyes count",
+                "Head: tooth count"
+        );
 
         // Базовый JPQL-запрос
         String baseQuery = """
@@ -141,7 +156,15 @@ public class DragonService {
         // Фильтрация
         boolean hasFilter = false;
         if (filterCol != null && !filterCol.isEmpty() && filterValue != null && !filterValue.isEmpty()) {
-            baseQuery += " AND LOWER(" + columnNames.get(filterCol) + ") LIKE LOWER(:filterValue)";
+            if (numericColumns.contains(filterCol)) {
+                // точное
+                baseQuery += " AND " + columnNames.get(filterCol) + " = :filterValue";
+                // частичное
+                // baseQuery += " AND FUNCTION('STR', " + columnNames.get(filterCol) + ") LIKE :filterValue"; // плохо
+                // baseQuery += " AND CONCAT('', " + columnNames.get(filterCol) + ") LIKE :filterValue"; // плохо
+            } else {
+                baseQuery += " AND LOWER(%" + columnNames.get(filterCol) + "%) LIKE LOWER(:filterValue)";
+            }
             hasFilter = true;
         }
 
@@ -157,7 +180,7 @@ public class DragonService {
 
         // Применение фильтра
         if (hasFilter) {
-            query.setParameter("filterValue", "%" + filterValue + "%");
+            query.setParameter("filterValue", filterValue);
         }
 
         // Пагинация
@@ -305,13 +328,14 @@ public class DragonService {
         }
 
         // проверять по собственным id вложенных объектов и проверять, есть ли dragon с такими же id вложенных объектов
-        // ээээээээээээ ???
+        // эээээээээааааа ??? а нужно ли?
 
         em.remove(dragon);
 
         return new PairReturnBooleanString(true, "Successfully deleted dragon.");
     }
 
+    // не каскадное
     @Transactional
     public int deleteDragons(long userId) {
         // здесь тоже проверять
@@ -343,6 +367,7 @@ public class DragonService {
         return em.createNativeQuery(query).executeUpdate();
     }
 
+    // без id, creationTime и ownerId
     public Dragon createEntityFromDTO(DragonDTO dto) {
         CoordinatesDTO coordinates = dto.getCoordinates();
         DragonCaveDTO cave = dto.getCave();
@@ -359,7 +384,6 @@ public class DragonService {
         }
 
         return new Dragon(
-                // без id, creationTime и ownerId
                 dto.getName(),
                 new Coordinates(
                         coordinates.getX(),
@@ -391,6 +415,7 @@ public class DragonService {
         );
     }
 
+    // + id, ownerId и creation date
     public Dragon createEntityFromDTOAllArgs(DragonDTO dto) {
         CoordinatesDTO coordinates = dto.getCoordinates();
         DragonCaveDTO cave = dto.getCave();

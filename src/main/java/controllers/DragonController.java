@@ -121,7 +121,7 @@ public class DragonController {
 
         DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 
-        return Response.status(Response.Status.NOT_MODIFIED).entity(
+        return Response.status(Response.Status.FORBIDDEN).entity(
                 new ResponseEntity(ResponseStatus.ERROR,"Dragon was not updated", null)
         ).build();
     }
