@@ -16,8 +16,11 @@
             <property name="hibernate.show_sql" value="false"/>
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/> <!-- update -->
+            <!-- нужно ставить update или create-drop, чтобы выполнялся файл resources/functions.sql -->
             <property name="jakarta.persistence.schema-generation.database.action" value="drop-and-create"/> <!-- drop-and-create -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
+
+<!--            <property name="hibernate.hbm2ddl.import_files" value="functions.sql"/>-->
         </properties>
     </persistence-unit>
 </persistence>
