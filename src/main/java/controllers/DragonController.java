@@ -109,10 +109,13 @@ public class DragonController {
         String username = securityContext.getUserPrincipal().getName();
         System.out.println(username);
 
+        boolean isAdmin = securityContext.isUserInRole("ADMIN");
+        System.out.println("is admin? " + isAdmin);
+
         long userId = authService.getUserByName(username).getId();
         System.out.println(userId);
 
-        boolean isUpdated = dragonService.updateDragonById(id, userId, dragonDTO);
+        boolean isUpdated = dragonService.updateDragonById(id, userId, dragonDTO, isAdmin);
 
         if (isUpdated) {
             return Response.ok().entity(

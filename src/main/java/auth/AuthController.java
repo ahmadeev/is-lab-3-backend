@@ -50,6 +50,7 @@ public class AuthController {
             ).build();
         }
 
+        // TODO: стоит добавлять в JWT еще и id
         if (BCrypt.checkpw(userInput.getPassword(), userStored.getPassword())) {
             String token = JWT.create()
                     .withSubject(userStored.getName())

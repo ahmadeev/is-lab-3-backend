@@ -191,14 +191,14 @@ public class DragonService {
         return query.getResultList();
     }
 
-    //  пока не готово
     @Transactional
-    public boolean updateDragonById(long id, long userId, DragonDTO dto) {
+    public boolean updateDragonById(long id, long userId, DragonDTO dto, boolean isUserAdmin) {
         Dragon dragon = em.find(Dragon.class, id);
         Dragon dragonToMerge = createEntityFromDTOAllArgs(dto);
 
+        // TODO: осталось добавить обработку галочки на разрешение редактирования
         if (dragon == null) return false;
-        if (dragon.getOwnerId() != userId) return false;
+        if (!(dragon.getOwnerId() == userId || isUserAdmin)) return false;
 
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
