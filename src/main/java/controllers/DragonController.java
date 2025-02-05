@@ -2,6 +2,7 @@ package controllers;
 
 import auth.AuthService;
 import dto.DragonDTO;
+import dto.DragonHeadDTO;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
@@ -270,10 +271,20 @@ public class DragonController {
     @Path("/fun-1")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response fun1() {
-        return Response.status(Response.Status.OK).entity(
-                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
-        ).build();
+    public Response fun1(@Valid DragonHeadDTO head) {
+        System.out.println(head);
+
+        int deleted = dragonService.fun1(head.getEyesCount(), head.getToothCount());
+
+        if (deleted > 0) {
+            return Response.status(Response.Status.OK).entity(
+                    new ResponseEntity(ResponseStatus.SUCCESS, "Successfully deleted %d dragons.".formatted(deleted), null)
+            ).build();
+        } else {
+            return Response.status(Response.Status.OK).entity(
+                    new ResponseEntity(ResponseStatus.SUCCESS, "Dragons either do not exist or can not be deleted.", null)
+            ).build();
+        }
     }
 
     @GET
@@ -281,8 +292,12 @@ public class DragonController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response fun2(@QueryParam("wingspan") Long wingspan) {
+        System.out.println(wingspan);
+
+        int count = dragonService.fun2(wingspan);
+
         return Response.status(Response.Status.OK).entity(
-                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+                new ResponseEntity(ResponseStatus.SUCCESS, "There are %d dragon(s) with the wingspan of %d.".formatted(count, wingspan), null)
         ).build();
     }
 
@@ -290,9 +305,13 @@ public class DragonController {
     @Path("/fun-3")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response fun3(@QueryParam("character") DragonCharacter character) {
+    public Response fun3(@QueryParam("character") String character) {
+        System.out.println(character);
+
+        List<Dragon> dragons = dragonService.fun3(character);
+
         return Response.status(Response.Status.OK).entity(
-                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+                new ResponseEntity(ResponseStatus.SUCCESS, "Successfully found dragons meet the condition.", dragons)
         ).build();
     }
 
@@ -301,8 +320,10 @@ public class DragonController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response fun4() {
+        Dragon dragon = dragonService.fun4();
+
         return Response.status(Response.Status.OK).entity(
-                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+                new ResponseEntity(ResponseStatus.SUCCESS, "Successfully found a dragon with the deepest cave.", dragon)
         ).build();
     }
 
@@ -311,8 +332,12 @@ public class DragonController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response fun5(@PathParam("id") long id, @Valid DragonDTO dragonDTO) {
+        System.out.println(id + ") " + dragonDTO);
+
+        long killerId = dragonService.fun5(id);
+
         return Response.status(Response.Status.OK).entity(
-                new ResponseEntity(ResponseStatus.SUCCESS, "", null)
+                new ResponseEntity(ResponseStatus.SUCCESS, "Person #%d killed the dragon #%d.".formatted(killerId, id), null)
         ).build();
     }
 

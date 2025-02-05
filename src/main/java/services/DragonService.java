@@ -473,8 +473,36 @@ public class DragonService {
 
     // ---------------- дополнительные функции
 
-    public void fun1() {
-        return;
+    @Transactional
+    public int fun1(float eyes, Double tooth) {
+        return (int) em.createNativeQuery("SELECT delete_dragons_by_head(:eyes, :tooth)")
+                .setParameter("eyes", eyes)
+                .setParameter("tooth", tooth)
+                .getSingleResult();
+    }
+
+    public int fun2(Long wingspan) {
+        return (int) em.createNativeQuery("SELECT count_dragons_by_wingspan(:wingspan)")
+                .setParameter("wingspan", wingspan)
+                .getSingleResult();
+    }
+
+    public List<Dragon> fun3(String character) {
+        return (List<Dragon>) em.createNativeQuery("SELECT * FROM get_dragons_by_character(:characterValue)", Dragon.class)
+                .setParameter("characterValue", character)
+                .getResultList();
+    }
+
+    public Dragon fun4() {
+        return (Dragon) em.createNativeQuery("SELECT * FROM find_dragon_in_deepest_cave()", Dragon.class)
+                .getSingleResult();
+    }
+
+    @Transactional
+    public long fun5(long dragonId) {
+        return (long) em.createNativeQuery("SELECT kill_dragon(:dragonId)")
+                .setParameter("dragonId", dragonId)
+                .getSingleResult();
     }
 
     // ---------------- вспомогательные к дополнительным

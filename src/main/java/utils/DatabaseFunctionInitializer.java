@@ -98,22 +98,25 @@ public class DatabaseFunctionInitializer {
     // назначает убийцу даже в случае не null убийцы у дракона
     private static final String fun5 = """
         CREATE OR REPLACE FUNCTION kill_dragon(dragon_id BIGINT)
-        RETURNS VOID AS $$
+        RETURNS BIGINT AS $$
         DECLARE
-            existing_killer BIGINT;
+            existing_killer_id BIGINT;
         BEGIN
-            -- Ищем случайного убийцу среди существующих людей
-            SELECT id INTO existing_killer FROM person ORDER BY RANDOM() LIMIT 1;
+            -- Ищем случайного убийцу
+            SELECT id INTO existing_killer_id FROM person ORDER BY RANDOM() LIMIT 1;
 
-            -- Если убийца не найден, создаем нового
-            IF existing_killer IS NULL THEN
-                INSERT INTO person(name, eye_color, hair_color, location, birthday, height)
-                VALUES ('Unknown Slayer', 'BLACK', NULL, CAST(ROW(0, 0, 0) AS location), CURRENT_DATE, 180)
-                RETURNING id INTO existing_killer;
+            -- Если убийца не найден, создаем нового и получаем его id
+            IF existing_killer_id IS NULL THEN
+                INSERT INTO person(name, eye_color, hair_color, location, birthday, height, owner_id)
+                VALUES ('Unknown Slayer', 'BLACK', NULL, CAST(ROW(0, 0, 0) AS location), CURRENT_DATE, 180, 0)
+                RETURNING id INTO existing_killer_id;
             END IF;
 
             -- Назначаем убийцу дракону
-            UPDATE dragon SET person_id = existing_killer WHERE id = dragon_id;
+            UPDATE dragon SET person_id = existing_killer_id WHERE id = dragon_id;
+
+            -- Возвращаем id убийцы
+            RETURN existing_killer_id;
         END;
         $$ LANGUAGE plpgsql;
     """;
