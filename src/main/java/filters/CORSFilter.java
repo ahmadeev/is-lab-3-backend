@@ -19,7 +19,7 @@ public class CORSFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        // Инициализация фильтра, если необходимо
+        // Инициализация фильтра
     }
 
     @Override
@@ -45,13 +45,12 @@ public class CORSFilter implements Filter {
             }
         }
 
-        // Продолжаем цепочку фильтров
         chain.doFilter(request, response);
     }
 
     @Override
     public void destroy() {
-        // Очистка ресурсов, если необходимо
+        // Очистка ресурсов
     }
 }
 
