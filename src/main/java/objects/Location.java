@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 import java.util.Objects;
 
@@ -16,6 +17,7 @@ import java.util.Objects;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Audited
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

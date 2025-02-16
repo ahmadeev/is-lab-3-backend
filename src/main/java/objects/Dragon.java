@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -18,7 +19,8 @@ import java.util.Objects;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Dragon {
+@Audited
+public class Dragon/* extends Auditable*/ {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
@@ -73,9 +75,27 @@ public class Dragon {
     @Column(name = "allow_editing")
     private boolean allowEditing;
 
+//    @Column(name = "created_at")
+//    private LocalDateTime createdAt;
+//    @Column(name = "updated_at")
+//    private LocalDateTime updatedAt;
+
     // ------------
 
-    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, long ownerId, boolean allowEditing) {
+    // + owner_id
+    public Dragon(
+            String name,
+            Coordinates coordinates,
+            DragonCave cave,
+            Person killer,
+            long age,
+            String description,
+            Long wingspan,
+            DragonCharacter character,
+            DragonHead head,
+            long ownerId,
+            boolean allowEditing
+    ) {
         this.name = name;
         this.coordinates = coordinates;
         this.cave = cave;
@@ -89,7 +109,18 @@ public class Dragon {
         this.allowEditing = allowEditing;
     }
 
-    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, boolean allowEditing) {
+    public Dragon(
+            String name,
+            Coordinates coordinates,
+            DragonCave cave,
+            Person killer,
+            long age,
+            String description,
+            Long wingspan,
+            DragonCharacter character,
+            DragonHead head,
+            boolean allowEditing
+    ) {
         this.name = name;
         this.coordinates = coordinates;
         this.cave = cave;
@@ -105,6 +136,12 @@ public class Dragon {
     @PrePersist
     protected void onCreate() {
         creationDate = ZonedDateTime.now(); // Установка текущей даты при создании
+//        createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+//        updatedAt = LocalDateTime.now();
     }
 
     public String toJson() {
