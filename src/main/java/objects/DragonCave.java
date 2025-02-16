@@ -30,15 +30,20 @@ public class DragonCave {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public DragonCave(float numberOfTreasures, long ownerId) {
+    public DragonCave(float numberOfTreasures, long ownerId, boolean allowEditing) {
         this.numberOfTreasures = numberOfTreasures;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public DragonCave(float numberOfTreasures) {
+    public DragonCave(float numberOfTreasures, boolean allowEditing) {
         this.numberOfTreasures = numberOfTreasures;
+        this.allowEditing = allowEditing;
     }
 
     public String toJson() {

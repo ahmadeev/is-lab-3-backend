@@ -33,17 +33,22 @@ public class DragonHead {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public DragonHead(float eyesCount, Double toothCount, long ownerId) {
+    public DragonHead(float eyesCount, Double toothCount, long ownerId, boolean allowEditing) {
         this.eyesCount = eyesCount;
         this.toothCount = toothCount;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public DragonHead(float eyesCount, Double toothCount) {
+    public DragonHead(float eyesCount, Double toothCount, boolean allowEditing) {
         this.eyesCount = eyesCount;
         this.toothCount = toothCount;
+        this.allowEditing = allowEditing;
     }
 
     public String toJson() {

@@ -57,9 +57,12 @@ public class Person {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height, long ownerId) {
+    public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height, long ownerId, boolean allowEditing) {
         this.name = name;
         this.eyeColor = eyeColor;
         this.hairColor = hairColor;
@@ -67,15 +70,17 @@ public class Person {
         this.birthday = birthday;
         this.height = height;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height) {
+    public Person(String name, Color eyeColor, Color hairColor, Location location, LocalDate birthday, Integer height, boolean allowEditing) {
         this.name = name;
         this.eyeColor = eyeColor;
         this.hairColor = hairColor;
         this.location = location;
         this.birthday = birthday;
         this.height = height;
+        this.allowEditing = allowEditing;
     }
 
     public String toJson() {

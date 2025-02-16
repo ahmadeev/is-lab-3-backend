@@ -33,17 +33,22 @@ public class Coordinates {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public Coordinates(long x, int y, long ownerId) {
+    public Coordinates(long x, int y, long ownerId, boolean allowEditing) {
         this.x = x;
         this.y = y;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public Coordinates(long x, int y) {
+    public Coordinates(long x, int y, boolean allowEditing) {
         this.x = x;
         this.y = y;
+        this.allowEditing = allowEditing;
     }
 
     public String toJson() {

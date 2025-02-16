@@ -55,7 +55,7 @@ public class DragonService {
             dragon.getCave().setOwnerId(userId);
         }
 
-        if (dto.getKiller().getId() != -1) {
+        if (dto.getKiller() != null && dto.getKiller().getId() != -1) {
             Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
 
             if (detachedPerson == null) return null;
@@ -63,11 +63,11 @@ public class DragonService {
             Person person = em.merge(detachedPerson);
 
             dragon.setKiller(person);
-        } else if (dto.getKiller().getId() == -1) {
+        } else if (dto.getKiller() != null && dto.getKiller().getId() == -1) {
             dragon.getKiller().setOwnerId(userId);
         }
 
-        if (dto.getKiller().getLocation().getId() != -1) {
+        if (dto.getKiller() != null && dto.getKiller().getLocation().getId() != -1) {
             Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
 
             if (detachedLocation == null) return null;
@@ -75,7 +75,7 @@ public class DragonService {
             Location location = em.merge(detachedLocation);
 
             dragon.getKiller().setLocation(location);
-        } else if (dto.getKiller().getLocation().getId() == -1) {
+        } else if (dto.getKiller() != null && dto.getKiller().getLocation().getId() == -1) {
             dragon.getKiller().getLocation().setOwnerId(userId);
         }
 
@@ -198,7 +198,7 @@ public class DragonService {
 
         // TODO: осталось добавить обработку галочки на разрешение редактирования
         if (dragon == null) return false;
-        if (!(dragon.getOwnerId() == userId || isUserAdmin)) return false;
+        if (!(dragon.getOwnerId() == userId || isUserAdmin && dragon.isAllowEditing())) return false;
 
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
@@ -213,12 +213,12 @@ public class DragonService {
         // разные наборы полей (существующий объект в базе (какие?) и запрос на изменение (чем?))
         if (dragon.getCoordinates().getId() == dragonToMerge.getCoordinates().getId()
                 && !(dragon.getCoordinates().equals(dragonToMerge.getCoordinates()))) {
-            if (dragon.getCoordinates().getOwnerId() != userId) return false;
+            if (!(dragon.getCoordinates().getOwnerId() == userId || isUserAdmin && dragon.getCoordinates().isAllowEditing())) return false;
             // --- 2 --- обновляем предложенными изменениями
             dragon.getCoordinates().setX(dto.getCoordinates().getX());
             dragon.getCoordinates().setY(dto.getCoordinates().getY());
         } else if (dragon.getCoordinates().getId() != dragonToMerge.getCoordinates().getId()) {
-            if (dragon.getCoordinates().getOwnerId() != userId) return false;
+            if (!(dragon.getCoordinates().getOwnerId() == userId || isUserAdmin && dragon.getCoordinates().isAllowEditing())) return false;
             // --- 1 --- заменяем объект полученным из бд с помощью второго айди
             Coordinates coordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
             dragon.setCoordinates(coordinates);
@@ -228,11 +228,11 @@ public class DragonService {
 
         if (dragon.getCave().getId() == dragonToMerge.getCave().getId()
                 && !(dragon.getCave().equals(dragonToMerge.getCave()))) {
-            if (dragon.getCave().getOwnerId() != userId) return false;
+            if (!(dragon.getCave().getOwnerId() == userId || isUserAdmin && dragon.getCave().isAllowEditing())) return false;
             // --- 2
             dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
         } else if (dragon.getCave().getId() != dragonToMerge.getCave().getId()) {
-            if (dragon.getCave().getOwnerId() != userId) return false;
+            if (!(dragon.getCave().getOwnerId() == userId || isUserAdmin && dragon.getCave().isAllowEditing())) return false;
             // --- 1
             DragonCave dragonCave = em.find(DragonCave.class, dto.getCave().getId());
             dragon.setCave(dragonCave);
@@ -245,7 +245,7 @@ public class DragonService {
         } else {
             if (dragon.getKiller().getId() == dragonToMerge.getKiller().getId()
                     && !(dragon.getKiller().equals(dragonToMerge.getKiller()))) {
-                if (dragon.getKiller().getOwnerId() != userId) return false;
+                if (!(dragon.getKiller().getOwnerId() == userId || isUserAdmin && dragon.getKiller().isAllowEditing())) return false;
                 // --- 2
                 dragon.getKiller().setName(dto.getKiller().getName());
                 dragon.getKiller().setEyeColor(dto.getKiller().getEyeColor());
@@ -254,7 +254,7 @@ public class DragonService {
                 dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
                 dragon.getKiller().setHeight(dto.getKiller().getHeight());
             } else if (dragon.getKiller().getId() != dragonToMerge.getKiller().getId()) {
-                if (dragon.getKiller().getOwnerId() != userId) return false;
+                if (!(dragon.getKiller().getOwnerId() == userId || isUserAdmin && dragon.getKiller().isAllowEditing())) return false;
                 // --- 1
                 Person person = em.find(Person.class, dto.getKiller().getId());
                 dragon.setKiller(person);
@@ -266,13 +266,13 @@ public class DragonService {
 
             if (dragon.getKiller().getLocation().getId() == dragonToMerge.getKiller().getLocation().getId()
                     && !(dragon.getKiller().getLocation().equals(dragonToMerge.getKiller().getLocation()))) {
-                if (dragon.getKiller().getLocation().getOwnerId() != userId) return false;
+                if (!(dragon.getKiller().getLocation().getOwnerId() == userId || isUserAdmin && dragon.getKiller().getLocation().isAllowEditing())) return false;
                 // --- 2
                 dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
                 dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
                 dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
             } else if (dragon.getKiller().getLocation().getId() != dragonToMerge.getKiller().getLocation().getId()) {
-                if (dragon.getKiller().getLocation().getOwnerId() != userId) return false;
+                if (!(dragon.getKiller().getLocation().getOwnerId() == userId || isUserAdmin && dragon.getKiller().getLocation().isAllowEditing())) return false;
                 // --- 1
                 Location location = em.find(Location.class, dto.getKiller().getLocation().getId());
                 dragon.getKiller().setLocation(location);
@@ -283,12 +283,12 @@ public class DragonService {
 
         if (dragon.getHead().getId() == dragonToMerge.getHead().getId()
                 && !(dragon.getHead().equals(dragonToMerge.getHead()))) {
-            if (dragon.getHead().getOwnerId() != userId) return false;
+            if (!(dragon.getHead().getOwnerId() == userId || isUserAdmin && dragon.getHead().isAllowEditing())) return false;
             // --- 2
             dragon.getHead().setEyesCount(dto.getHead().getEyesCount());
             dragon.getHead().setToothCount(dto.getHead().getToothCount());
         } else if (dragon.getHead().getId() != dragonToMerge.getHead().getId()) {
-            if (dragon.getHead().getOwnerId() != userId) return false;
+            if (!(dragon.getHead().getOwnerId() == userId || isUserAdmin && dragon.getHead().isAllowEditing())) return false;
             // --- 1
             DragonHead dragonHead = em.find(DragonHead.class, dto.getHead().getId());
             dragon.setHead(dragonHead);
@@ -307,7 +307,7 @@ public class DragonService {
     }
 
     @Transactional
-    public PairReturnBooleanString deleteDragonById(long id, long userId) {
+    public PairReturnBooleanString deleteDragonById(long id, long userId, boolean isAdmin) {
         Dragon dragon = em.find(Dragon.class, id);
 
         if (dragon == null) {
@@ -382,10 +382,12 @@ public class DragonService {
                 dto.getName(),
                 new Coordinates(
                         coordinates.getX(),
-                        coordinates.getY()
+                        coordinates.getY(),
+                        coordinates.isAllowEditing()
                 ),
                 new DragonCave(
-                        cave.getNumberOfTreasures()
+                        cave.getNumberOfTreasures(),
+                        cave.isAllowEditing()
                 ),
                 killer == null ? null : new Person(
                         killer.getName(),
@@ -394,10 +396,12 @@ public class DragonService {
                         new Location(
                                 location.getX(),
                                 location.getY(),
-                                location.getZ()
+                                location.getZ(),
+                                location.isAllowEditing()
                         ),
                         killer.getBirthday(),
-                        killer.getHeight()
+                        killer.getHeight(),
+                        killer.isAllowEditing()
                 ),
                 dto.getAge(),
                 dto.getDescription(),
@@ -405,8 +409,10 @@ public class DragonService {
                 dto.getCharacter(),
                 new DragonHead(
                         head.getEyesCount(),
-                        head.getToothCount()
-                )
+                        head.getToothCount(),
+                        head.isAllowEditing()
+                ),
+                dto.isAllowEditing()
         );
     }
 
@@ -433,13 +439,15 @@ public class DragonService {
                         coordinates.getId(),
                         coordinates.getX(),
                         coordinates.getY(),
-                        coordinates.getOwnerId()
+                        coordinates.getOwnerId(),
+                        coordinates.isAllowEditing()
                 ),
                 dto.getCreationDate(),
                 new DragonCave(
                         cave.getId(),
                         cave.getNumberOfTreasures(),
-                        cave.getOwnerId()
+                        cave.getOwnerId(),
+                        cave.isAllowEditing()
                 ),
                 killer == null ? null : new Person(
                         killer.getId(),
@@ -451,11 +459,13 @@ public class DragonService {
                                 location.getX(),
                                 location.getY(),
                                 location.getZ(),
-                                location.getOwnerId()
+                                location.getOwnerId(),
+                                location.isAllowEditing()
                         ),
                         killer.getBirthday(),
                         killer.getHeight(),
-                        killer.getOwnerId()
+                        killer.getOwnerId(),
+                        killer.isAllowEditing()
                 ),
                 dto.getAge(),
                 dto.getDescription(),
@@ -465,9 +475,11 @@ public class DragonService {
                         head.getId(),
                         head.getEyesCount(),
                         head.getToothCount(),
-                        head.getOwnerId()
+                        head.getOwnerId(),
+                        head.isAllowEditing()
                 ),
-                dto.getOwnerId()
+                dto.getOwnerId(),
+                dto.isAllowEditing()
         );
     }
 

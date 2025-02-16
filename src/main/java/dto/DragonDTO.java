@@ -1,5 +1,6 @@
 package dto;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.ws.rs.DefaultValue;
@@ -36,4 +37,6 @@ public class DragonDTO {
 
     @DefaultValue(value="-1")
     private long ownerId;
+    @DefaultValue(value="false")
+    private boolean allowEditing;
 }

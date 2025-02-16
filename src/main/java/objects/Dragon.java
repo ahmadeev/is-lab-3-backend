@@ -70,9 +70,12 @@ public class Dragon {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, long ownerId) {
+    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, long ownerId, boolean allowEditing) {
         this.name = name;
         this.coordinates = coordinates;
         this.cave = cave;
@@ -83,9 +86,10 @@ public class Dragon {
         this.character = character;
         this.head = head;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head) {
+    public Dragon(String name, Coordinates coordinates, DragonCave cave, Person killer, long age, String description, Long wingspan, DragonCharacter character, DragonHead head, boolean allowEditing) {
         this.name = name;
         this.coordinates = coordinates;
         this.cave = cave;
@@ -95,6 +99,7 @@ public class Dragon {
         this.wingspan = wingspan;
         this.character = character;
         this.head = head;
+        this.allowEditing = allowEditing;
     }
 
     @PrePersist

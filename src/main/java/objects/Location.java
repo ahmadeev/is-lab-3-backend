@@ -36,19 +36,24 @@ public class Location {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "allow_editing")
+    private boolean allowEditing;
+
     // ------------
 
-    public Location(int x, Integer y, int z, long ownerId) {
+    public Location(int x, Integer y, int z, long ownerId, boolean allowEditing) {
         this.x = x;
         this.y = y;
         this.z = z;
         this.ownerId = ownerId;
+        this.allowEditing = allowEditing;
     }
 
-    public Location(int x, Integer y, int z) {
+    public Location(int x, Integer y, int z, boolean allowEditing) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.allowEditing = allowEditing;
     }
 
     public String toJson() {

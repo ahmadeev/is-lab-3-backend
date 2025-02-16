@@ -19,4 +19,6 @@ public class DragonCaveDTO {
 
     @DefaultValue(value="-1")
     private long ownerId;
+    @DefaultValue(value="false")
+    private boolean allowEditing;
 }

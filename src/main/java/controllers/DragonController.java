@@ -140,13 +140,16 @@ public class DragonController {
         String username = securityContext.getUserPrincipal().getName();
         System.out.println(username);
 
+        boolean isAdmin = securityContext.isUserInRole("ADMIN");
+        System.out.println("is admin? " + isAdmin);
+
         long userId = authService.getUserByName(username).getId();
         System.out.println(userId);
 
         // узнал я, что ошибка летит после неудачного каскадного удаления, поэтому теперь так :с
         PairReturnBooleanString result;
         try {
-            result = dragonService.deleteDragonById(id, userId);
+            result = dragonService.deleteDragonById(id, userId, isAdmin);
         } catch (Exception e) {
             result = new PairReturnBooleanString(
                     false,
