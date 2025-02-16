@@ -38,6 +38,9 @@ public class Location {
     @Column(name = "owner_id")
     private long ownerId;
 
+    @Column(name = "updated_by")
+    private long updatedBy;
+
     @Column(name = "allow_editing")
     private boolean allowEditing;
 

@@ -34,6 +34,8 @@ public class PersonDTO {
 
     @DefaultValue(value="-1")
     private long ownerId;
+    @DefaultValue(value="-1")
+    private long updatedBy;
     @DefaultValue(value="false")
     private boolean allowEditing;
 }

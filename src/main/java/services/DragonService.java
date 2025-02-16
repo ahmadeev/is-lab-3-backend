@@ -41,6 +41,7 @@ public class DragonService {
             dragon.setCoordinates(coordinates);
         } else if (dto.getCoordinates().getId() == -1) {
             dragon.getCoordinates().setOwnerId(userId);
+            dragon.getCoordinates().setUpdatedBy(userId);
         }
 
         if (dto.getCave().getId() != -1) {
@@ -53,6 +54,7 @@ public class DragonService {
             dragon.setCave(dragonCave);
         } else if (dto.getCave().getId() == -1) {
             dragon.getCave().setOwnerId(userId);
+            dragon.getCave().setUpdatedBy(userId);
         }
 
         if (dto.getKiller() != null && dto.getKiller().getId() != -1) {
@@ -65,6 +67,7 @@ public class DragonService {
             dragon.setKiller(person);
         } else if (dto.getKiller() != null && dto.getKiller().getId() == -1) {
             dragon.getKiller().setOwnerId(userId);
+            dragon.getKiller().setUpdatedBy(userId);
         }
 
         if (dto.getKiller() != null && dto.getKiller().getLocation().getId() != -1) {
@@ -77,6 +80,7 @@ public class DragonService {
             dragon.getKiller().setLocation(location);
         } else if (dto.getKiller() != null && dto.getKiller().getLocation().getId() == -1) {
             dragon.getKiller().getLocation().setOwnerId(userId);
+            dragon.getKiller().getLocation().setUpdatedBy(userId);
         }
 
         if (dto.getHead().getId() != -1) {
@@ -89,6 +93,7 @@ public class DragonService {
             dragon.setHead(dragonHead);
         } else if (dto.getHead().getId() == -1) {
             dragon.getHead().setOwnerId(userId);
+            dragon.getHead().setUpdatedBy(userId);
         }
 
         dragon.setOwnerId(userId);
@@ -218,6 +223,7 @@ public class DragonService {
             // --- 2 --- обновляем предложенными изменениями
             dragon.getCoordinates().setX(dto.getCoordinates().getX());
             dragon.getCoordinates().setY(dto.getCoordinates().getY());
+            dragon.getCoordinates().setUpdatedBy(userId);
         } else if (dragon.getCoordinates().getId() != dragonToMerge.getCoordinates().getId()) {
             if (!(dragon.getCoordinates().getOwnerId() == userId || isUserAdmin && dragon.getCoordinates().isAllowEditing())) return false;
             // --- 1 --- заменяем объект полученным из бд с помощью второго айди
@@ -232,6 +238,7 @@ public class DragonService {
             if (!(dragon.getCave().getOwnerId() == userId || isUserAdmin && dragon.getCave().isAllowEditing())) return false;
             // --- 2
             dragon.getCave().setNumberOfTreasures(dto.getCave().getNumberOfTreasures());
+            dragon.getCave().setUpdatedBy(userId);
         } else if (dragon.getCave().getId() != dragonToMerge.getCave().getId()) {
             if (!(dragon.getCave().getOwnerId() == userId || isUserAdmin && dragon.getCave().isAllowEditing())) return false;
             // --- 1
@@ -256,6 +263,7 @@ public class DragonService {
                 // намеренно упускаем Location (обновим ниже)
                 dragon.getKiller().setBirthday(dto.getKiller().getBirthday());
                 dragon.getKiller().setHeight(dto.getKiller().getHeight());
+                dragon.getKiller().setUpdatedBy(userId);
             } else if (dragon.getKiller().getId() != dragonToMerge.getKiller().getId()) {
                 if (!(dragon.getKiller().getOwnerId() == userId || isUserAdmin && dragon.getKiller().isAllowEditing())) return false;
                 // --- 1
@@ -274,6 +282,7 @@ public class DragonService {
                 dragon.getKiller().getLocation().setX(dto.getKiller().getLocation().getX());
                 dragon.getKiller().getLocation().setY(dto.getKiller().getLocation().getY());
                 dragon.getKiller().getLocation().setZ(dto.getKiller().getLocation().getZ());
+                dragon.getKiller().getLocation().setUpdatedBy(userId);
             } else if (dragon.getKiller().getLocation().getId() != dragonToMerge.getKiller().getLocation().getId()) {
                 if (!(dragon.getKiller().getLocation().getOwnerId() == userId || isUserAdmin && dragon.getKiller().getLocation().isAllowEditing())) return false;
                 // --- 1
@@ -290,6 +299,7 @@ public class DragonService {
             // --- 2
             dragon.getHead().setEyesCount(dto.getHead().getEyesCount());
             dragon.getHead().setToothCount(dto.getHead().getToothCount());
+            dragon.getHead().setUpdatedBy(userId);
         } else if (dragon.getHead().getId() != dragonToMerge.getHead().getId()) {
             if (!(dragon.getHead().getOwnerId() == userId || isUserAdmin && dragon.getHead().isAllowEditing())) return false;
             // --- 1
@@ -444,6 +454,7 @@ public class DragonService {
                         coordinates.getX(),
                         coordinates.getY(),
                         coordinates.getOwnerId(),
+                        coordinates.getUpdatedBy(),
                         coordinates.isAllowEditing()
                 ),
                 dto.getCreationDate(),
@@ -451,6 +462,7 @@ public class DragonService {
                         cave.getId(),
                         cave.getNumberOfTreasures(),
                         cave.getOwnerId(),
+                        cave.getUpdatedBy(),
                         cave.isAllowEditing()
                 ),
                 killer == null ? null : new Person(
@@ -464,11 +476,13 @@ public class DragonService {
                                 location.getY(),
                                 location.getZ(),
                                 location.getOwnerId(),
+                                location.getUpdatedBy(),
                                 location.isAllowEditing()
                         ),
                         killer.getBirthday(),
                         killer.getHeight(),
                         killer.getOwnerId(),
+                        killer.getUpdatedBy(),
                         killer.isAllowEditing()
                 ),
                 dto.getAge(),
@@ -480,6 +494,7 @@ public class DragonService {
                         head.getEyesCount(),
                         head.getToothCount(),
                         head.getOwnerId(),
+                        head.getUpdatedBy(),
                         head.isAllowEditing()
                 ),
                 dto.getOwnerId(),
