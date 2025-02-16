@@ -4,22 +4,26 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @MappedSuperclass
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class Auditable {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "created_by", nullable = false, updatable = false)
-    private String createdBy;
+    private long createdBy;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "updated_by")
-    private String updatedBy;
+    private long updatedBy;
 
     @PrePersist
     protected void onCreate() {
@@ -31,7 +35,7 @@ public abstract class Auditable {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public Auditable(String createdBy, String updatedBy) {
+    public Auditable(long createdBy, long updatedBy) {
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
     }

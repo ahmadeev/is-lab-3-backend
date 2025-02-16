@@ -1,5 +1,6 @@
 package objects;
 
+import jakarta.enterprise.inject.Model;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.persistence.*;
@@ -20,7 +21,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Audited
-public class Dragon/* extends Auditable*/ {
+public class Dragon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
@@ -71,6 +72,8 @@ public class Dragon/* extends Auditable*/ {
 
     @Column(name = "owner_id")
     private long ownerId;
+    @Column(name = "updated_by")
+    private long updatedBy;
 
     @Column(name = "allow_editing")
     private boolean allowEditing;
@@ -79,6 +82,10 @@ public class Dragon/* extends Auditable*/ {
 //    private LocalDateTime createdAt;
 //    @Column(name = "updated_at")
 //    private LocalDateTime updatedAt;
+//    @Column(name = "created_by")
+//    private long createdBy;
+//    @Column(name = "updated_by")
+//    private long updatedBy;
 
     // ------------
 

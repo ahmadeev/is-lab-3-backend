@@ -92,6 +92,7 @@ public class DragonService {
         }
 
         dragon.setOwnerId(userId);
+        dragon.setUpdatedBy(userId);
         System.out.println(dragon.toJson());
         em.persist(dragon);
         return dragon;
@@ -238,7 +239,9 @@ public class DragonService {
             dragon.setCave(dragonCave);
         }
 
-        System.out.println("=============== killer ---- : " + dragon.getKiller().equals(dragonToMerge.getKiller()));
+        if (dragon.getKiller() != null) {
+            System.out.println("=============== killer ---- : " + dragon.getKiller().equals(dragonToMerge.getKiller()));
+        }
 
         if (dragonToMerge.getKiller() == null) {
             dragon.setKiller(null);
@@ -300,7 +303,8 @@ public class DragonService {
         dragon.setDescription(dto.getDescription());
         dragon.setWingspan(dto.getWingspan());
         dragon.setCharacter(dto.getCharacter());
-        dragon.setOwnerId(userId);
+        dragon.setOwnerId(dragon.getOwnerId()); // TODO: подумать
+        dragon.setUpdatedBy(userId);
 
         em.merge(dragon);
         return true;
@@ -479,6 +483,7 @@ public class DragonService {
                         head.isAllowEditing()
                 ),
                 dto.getOwnerId(),
+                dto.getUpdatedBy(),
                 dto.isAllowEditing()
         );
     }
