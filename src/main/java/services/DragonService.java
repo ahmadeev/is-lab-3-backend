@@ -31,7 +31,8 @@ public class DragonService {
         Dragon dragon = createEntityFromDTO(dto);
 
         // можно проверять и на null, но смысла мало
-        if (dto.getCoordinates().getId() != -1) {
+        // TODO: if стоит перевернуть (из-за этого были проблемы на лабе, но сейчас уже все хорошо)
+        if (dto.getCoordinates().getId() != -1 && dto.getCoordinates().getId() != 0) {
             Coordinates detachedCoordinates = em.find(Coordinates.class, dto.getCoordinates().getId());
 
             if (detachedCoordinates == null) return null;
@@ -39,12 +40,12 @@ public class DragonService {
             Coordinates coordinates = em.merge(detachedCoordinates);
 
             dragon.setCoordinates(coordinates);
-        } else if (dto.getCoordinates().getId() == -1) {
+        } else if (dto.getCoordinates().getId() == -1 || dto.getCoordinates().getId() == 0) {
             dragon.getCoordinates().setOwnerId(userId);
             dragon.getCoordinates().setUpdatedBy(userId);
         }
 
-        if (dto.getCave().getId() != -1) {
+        if (dto.getCave().getId() != -1 && dto.getCave().getId() != 0) {
             DragonCave detachedDragonCave = em.find(DragonCave.class, dto.getCave().getId());
 
             if (detachedDragonCave == null) return null;
@@ -52,12 +53,12 @@ public class DragonService {
             DragonCave dragonCave = em.merge(detachedDragonCave);
 
             dragon.setCave(dragonCave);
-        } else if (dto.getCave().getId() == -1) {
+        } else if (dto.getCave().getId() == -1 || dto.getCave().getId() == 0) {
             dragon.getCave().setOwnerId(userId);
             dragon.getCave().setUpdatedBy(userId);
         }
 
-        if (dto.getKiller() != null && dto.getKiller().getId() != -1) {
+        if (dto.getKiller() != null && dto.getKiller().getId() != -1 && dto.getKiller().getId() != 0) {
             Person detachedPerson = em.find(Person.class, dto.getKiller().getId());
 
             if (detachedPerson == null) return null;
@@ -65,12 +66,12 @@ public class DragonService {
             Person person = em.merge(detachedPerson);
 
             dragon.setKiller(person);
-        } else if (dto.getKiller() != null && dto.getKiller().getId() == -1) {
+        } else if (dto.getKiller() != null && (dto.getKiller().getId() == -1 || dto.getKiller().getId() == 0)) {
             dragon.getKiller().setOwnerId(userId);
             dragon.getKiller().setUpdatedBy(userId);
         }
 
-        if (dto.getKiller() != null && dto.getKiller().getLocation().getId() != -1) {
+        if (dto.getKiller() != null && dto.getKiller().getLocation().getId() != -1 && dto.getKiller().getLocation().getId() != 0) {
             Location detachedLocation = em.find(Location.class, dto.getKiller().getLocation().getId());
 
             if (detachedLocation == null) return null;
@@ -78,12 +79,12 @@ public class DragonService {
             Location location = em.merge(detachedLocation);
 
             dragon.getKiller().setLocation(location);
-        } else if (dto.getKiller() != null && dto.getKiller().getLocation().getId() == -1) {
+        } else if (dto.getKiller() != null && (dto.getKiller().getLocation().getId() == -1 || dto.getKiller().getLocation().getId() == 0)) {
             dragon.getKiller().getLocation().setOwnerId(userId);
             dragon.getKiller().getLocation().setUpdatedBy(userId);
         }
 
-        if (dto.getHead().getId() != -1) {
+        if (dto.getHead().getId() != -1 && dto.getHead().getId() != 0) {
             DragonHead detachedDragonHead = em.find(DragonHead.class, dto.getHead().getId());
 
             if (detachedDragonHead == null) return null;
@@ -91,14 +92,14 @@ public class DragonService {
             DragonHead dragonHead = em.merge(detachedDragonHead);
 
             dragon.setHead(dragonHead);
-        } else if (dto.getHead().getId() == -1) {
+        } else if (dto.getHead().getId() == -1 || dto.getHead().getId() == 0) {
             dragon.getHead().setOwnerId(userId);
             dragon.getHead().setUpdatedBy(userId);
         }
 
         dragon.setOwnerId(userId);
         dragon.setUpdatedBy(userId);
-        System.out.println(dragon.toJson());
+
         em.persist(dragon);
         return dragon;
     }
