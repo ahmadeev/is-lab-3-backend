@@ -105,6 +105,14 @@ public class DragonService {
     }
 
     @Transactional
+    public List<Dragon> createAll(List<Dragon> dragons) {
+        for (Dragon dragon : dragons) {
+            em.persist(dragon);
+        }
+        return dragons;
+    }
+
+    @Transactional
     public Dragon getDragonById(long id) {
         return em.find(Dragon.class, id);
     }
