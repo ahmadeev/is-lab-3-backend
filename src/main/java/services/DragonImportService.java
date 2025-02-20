@@ -42,10 +42,6 @@ public class DragonImportService {
 
         String[] parts = line.split(";");
 
-        for (int i = 0; i < parts.length; i++) {
-            System.out.println(i + " : " + parts[i]);
-        }
-
         boolean isKillerExist = false;
         for (int i = 6; i < 16; i++) {
             if (!isEmptyString.apply(parts[i])) {

@@ -17,6 +17,8 @@ import java.util.Set;
 @ApplicationScoped
 public class DragonService {
 
+/*    private final static int BATCH_SIZE = 50;*/
+
     @PersistenceContext
     protected EntityManager em;
 
@@ -106,11 +108,31 @@ public class DragonService {
 
     @Transactional
     public List<Dragon> createAll(List<Dragon> dragons) {
+        long start = System.nanoTime();
         for (Dragon dragon : dragons) {
             em.persist(dragon);
         }
+        long end = System.nanoTime();
+        System.out.println((end - start) / 1_000_000 + " ms");
         return dragons;
     }
+
+/*    @Transactional
+    public List<Dragon> createAll(List<Dragon> dragons) {
+        long start = System.nanoTime();
+
+        try {
+            for (int i = 0; i < dragons.size(); i++) {
+                em.persist(dragons.get(i));
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+
+        long end = System.nanoTime();
+        System.out.println((end - start) / 1_000_000 + " ms");
+        return dragons;
+    }*/
 
     @Transactional
     public Dragon getDragonById(long id) {
