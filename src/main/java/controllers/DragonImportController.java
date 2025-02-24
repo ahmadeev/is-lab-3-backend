@@ -2,6 +2,7 @@ package controllers;
 
 import auth.AuthService;
 import auth.User;
+import dto.utils.ImportHistoryUnitDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -88,7 +89,7 @@ public class DragonImportController {
         // TODO: переделать с JWT
         User user = authService.getUserByName(securityContext.getUserPrincipal().getName());
 
-        List<ImportHistoryUnit> importHistory = dragonImportService.getImportHistory(user, page, pageSize, filterValue, filterCol, sortBy, sortDir);
+        List<ImportHistoryUnitDTO> importHistory = dragonImportService.getImportHistory(user, page, pageSize, filterValue, filterCol, sortBy, sortDir);
 
         return Response.ok().entity(
                 new ResponseEntity(ResponseStatus.SUCCESS,"Successfully got import history", importHistory)

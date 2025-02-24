@@ -2,6 +2,7 @@ package services;
 
 import auth.Roles;
 import auth.User;
+import dto.utils.ImportHistoryUnitDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -55,8 +56,8 @@ public class DragonImportService {
 
     }
 
-    public List<ImportHistoryUnit> getImportHistory(User user, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
-        List<ImportHistoryUnit> importHistory;
+    public List<ImportHistoryUnitDTO> getImportHistory(User user, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+        List<ImportHistoryUnitDTO> importHistory;
         if (user.getRole().equals(Roles.ADMIN)) {
             importHistory = importHistoryRepository.findAll(-1, page, pageSize, filterValue, filterCol, sortBy, sortDir);
         } else {

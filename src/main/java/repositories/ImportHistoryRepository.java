@@ -1,5 +1,6 @@
 package repositories;
 
+import dto.utils.ImportHistoryUnitDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,7 +23,7 @@ public class ImportHistoryRepository {
     }
 
     @Transactional
-    public List<ImportHistoryUnit> findAll(long userId, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+    public List<ImportHistoryUnitDTO> findAll(long userId, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
         // в будущем необходимо добавить id и ownerId
         Map<String, String> columnNames = Map.ofEntries(
                 Map.entry("id", "ih.id"),
@@ -40,9 +41,9 @@ public class ImportHistoryRepository {
 
         // Базовый JPQL-запрос
         String baseQuery = """
-        SELECT ih
+        SELECT new dto.utils.ImportHistoryUnitDTO(ih.id, ih.status, u.id, ih.rowsAdded)
         FROM ImportHistoryUnit ih
-        LEFT JOIN FETCH ih.user u
+        LEFT JOIN ih.user u
         WHERE 1=1
         """;
 
@@ -73,7 +74,7 @@ public class ImportHistoryRepository {
         }
 
         // Создание TypedQuery
-        TypedQuery<ImportHistoryUnit> query = em.createQuery(baseQuery, ImportHistoryUnit.class);
+        TypedQuery<ImportHistoryUnitDTO> query = em.createQuery(baseQuery, ImportHistoryUnitDTO.class);
 
         if (userId > 0) {
             query.setParameter("userId", userId);
