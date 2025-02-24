@@ -78,4 +78,12 @@ public class DragonCave {
     public int hashCode() {
         return Objects.hash(numberOfTreasures, ownerId);
     }
+
+    public boolean isValid() {
+        DragonCave c = this;
+
+        return (
+            c.numberOfTreasures > 0
+        );
+    }
 }

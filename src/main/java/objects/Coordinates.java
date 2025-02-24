@@ -84,4 +84,12 @@ public class Coordinates {
     public int hashCode() {
         return Objects.hash(x, y, ownerId);
     }
+
+    public boolean isValid() {
+        Coordinates c = this;
+
+        return (
+            c.x > -596
+        );
+    }
 }

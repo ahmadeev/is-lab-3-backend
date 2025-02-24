@@ -90,4 +90,12 @@ public class Location {
     public int hashCode() {
         return Objects.hash(x, y, z, ownerId);
     }
+
+    public boolean isValid() {
+        Location l = this;
+
+        return (
+                !Objects.isNull(l.y)
+        );
+    }
 }

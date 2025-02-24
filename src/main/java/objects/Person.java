@@ -120,4 +120,16 @@ public class Person {
     public int hashCode() {
         return Objects.hash(name, eyeColor, hairColor, location, birthday, height, ownerId);
     }
+
+    public boolean isValid() {
+        Person p = this;
+
+        return (
+                    !(Objects.isNull(p.name) || p.name.isEmpty() || p.name.isBlank()) &&
+                    !Objects.isNull(p.eyeColor) &&
+                    (!Objects.isNull(p.location) && p.location.isValid()) &&
+                    !Objects.isNull(p.birthday) &&
+                    (Objects.isNull(p.height) || p.height > 0)
+        );
+    }
 }

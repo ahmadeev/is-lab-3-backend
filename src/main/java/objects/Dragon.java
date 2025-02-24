@@ -183,4 +183,18 @@ public class Dragon {
     public int hashCode() {
         return Objects.hash(name, coordinates, cave, killer, age, description, wingspan, character, head, ownerId);
     }
+
+    public boolean isValid() {
+        Dragon d = this;
+
+        return (
+                !(Objects.isNull(d.name) || d.name.isEmpty()) &&
+                d.coordinates.isValid() &&
+                d.cave.isValid() &&
+                (d.killer.isValid() || Objects.isNull(d.killer)) &&
+                d.age > 0 &&
+                d.wingspan > 0 &&
+                d.head.isValid()
+        );
+    }
 }

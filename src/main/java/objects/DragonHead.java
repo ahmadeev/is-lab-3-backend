@@ -84,4 +84,12 @@ public class DragonHead {
     public int hashCode() {
         return Objects.hash(eyesCount, toothCount, ownerId);
     }
+
+    public boolean isValid() {
+        DragonHead dh = this;
+
+        return (
+            !Objects.isNull(dh.toothCount)
+        );
+    }
 }

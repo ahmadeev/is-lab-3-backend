@@ -40,17 +40,29 @@ public class DragonImportService {
             while ((line = reader.readLine()) != null) {
                 Dragon dragon = parseCsvLine(line);
                 // validate, exception if not valid
+                if (!dragon.isValid()) {
+                    System.out.println("dragon: %b\ncoordinates: %b\ncave: %b\nkiller: %b\nlocation: %b\nhead: %b".formatted(
+                            dragon.isValid(),
+                            dragon.getCoordinates().isValid(),
+                            dragon.getCave().isValid(),
+                            dragon.getKiller().isValid(),
+                            dragon.getKiller().getLocation().isValid(),
+                            dragon.getHead().isValid()
+                    ));
+                    throw new Exception("Invalid dragon");
+                }
                 dragons.add(dragon);
             }
             System.out.println("size: " + dragons.size());
-            // сохраняем всех драконов в транзакции
+            // сохраняем всех драконов в транзакции (если какой-то из драконов невалидный, до этой строки не доходит)
             dragonService.createAll(dragons);
             // import history row
             importHistoryUnit.setStatus(ImportStatus.SUCCESS);
+            importHistoryUnit.setRowsAdded(dragons.size());
         } catch (Exception e) {
             importHistoryUnit.setStatus(ImportStatus.FAILURE);
+            importHistoryUnit.setRowsAdded(0);
         } finally {
-            importHistoryUnit.setRowsAdded(dragons.size());
             importHistoryRepository.save(importHistoryUnit);
         }
 
