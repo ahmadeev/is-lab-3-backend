@@ -1,15 +1,19 @@
 package services;
 
+import auth.Roles;
+import auth.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.transaction.Transactional;
 import objects.*;
+import objects.utils.ImportHistoryUnit;
+import objects.utils.ImportStatus;
+import repositories.ImportHistoryRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -21,20 +25,44 @@ public class DragonImportService {
     @Inject
     private DragonService dragonService;
 
+    @Inject
+    private ImportHistoryRepository importHistoryRepository;
+
     @Transactional
-    public void importDragonsFromCsv(InputStream inputStream) throws Exception {
+    public void importDragonsFromCsv(InputStream inputStream, User user) throws Exception {
         List<Dragon> dragons = new ArrayList<>();
+        ImportHistoryUnit importHistoryUnit = new ImportHistoryUnit();
+        importHistoryUnit.setUser(user);
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 Dragon dragon = parseCsvLine(line);
+                // validate, exception if not valid
                 dragons.add(dragon);
             }
+            System.out.println("size: " + dragons.size());
+            // сохраняем всех драконов в транзакции
+            dragonService.createAll(dragons);
+            // import history row
+            importHistoryUnit.setStatus(ImportStatus.SUCCESS);
+        } catch (Exception e) {
+            importHistoryUnit.setStatus(ImportStatus.FAILURE);
+        } finally {
+            importHistoryUnit.setRowsAdded(dragons.size());
+            importHistoryRepository.save(importHistoryUnit);
         }
 
-        // сохраняем всех драконов в транзакции
-        dragonService.createAll(dragons);
+    }
+
+    public List<ImportHistoryUnit> getImportHistory(User user, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
+        List<ImportHistoryUnit> importHistory;
+        if (user.getRole().equals(Roles.ADMIN)) {
+            importHistory = importHistoryRepository.findAll(-1, page, pageSize, filterValue, filterCol, sortBy, sortDir);
+        } else {
+            importHistory = importHistoryRepository.findAll(user.getId(), page, pageSize, filterValue, filterCol, sortBy, sortDir);
+        }
+        return importHistory;
     }
 
     private Dragon parseCsvLine(String line) {
@@ -89,4 +117,6 @@ public class DragonImportService {
         System.out.println(dragon.toJson());
         return dragon;
     }
+
+
 }
