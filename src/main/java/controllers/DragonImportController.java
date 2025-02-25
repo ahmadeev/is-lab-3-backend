@@ -21,6 +21,7 @@ import responses.ResponseStatus;
 import services.DragonImportService;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +31,8 @@ import java.util.Map;
 @Path("/user/import")
 @MultipartConfig
 public class DragonImportController {
+    private static final int MIN_FILES_COUNT = 1;
+
     @Inject
     private DragonImportService dragonImportService;
 
@@ -56,12 +59,20 @@ public class DragonImportController {
                 inputParts = uploadForm.get("file");
             }
 
-            // обрабатываем каждый файл
-            for (InputPart part : inputParts) {
-                InputStream inputStream = part.getBody(InputStream.class, null);
-                // TODO: складывать стримы в один объект и передавать ему одному методу
-                dragonImportService.importDragonsFromCsv(inputStream, user);
+            // проверка на минимальное количество файлов
+            if (inputParts.size() < MIN_FILES_COUNT) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ResponseEntity(ResponseStatus.ERROR, "Minimum " + MIN_FILES_COUNT + " files required", null))
+                        .build();
             }
+
+            // обрабатываем каждый файл
+            List<InputStream> inputStreams = new ArrayList<>();
+            for (InputPart part : inputParts) {
+                inputStreams.add(part.getBody(InputStream.class, null));
+            }
+
+            dragonImportService.importDragonsFromCsv(inputStreams, user);
 
             return Response.ok()
                     .entity(new ResponseEntity(ResponseStatus.SUCCESS, "Dragons imported successfully", null))

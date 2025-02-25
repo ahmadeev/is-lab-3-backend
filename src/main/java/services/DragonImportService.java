@@ -30,16 +30,20 @@ public class DragonImportService {
     private ImportHistoryRepository importHistoryRepository;
 
     @Transactional
-    public void importDragonsFromCsv(InputStream inputStream, User user) throws Exception {
-        List<Dragon> dragons = new ArrayList<>();
+    public void importDragonsFromCsv(List<InputStream> inputStreams, User user) throws Exception {
+        List<Dragon> allDragons = new ArrayList<>();
         ImportHistoryUnit importHistoryUnit = new ImportHistoryUnit();
         importHistoryUnit.setUser(user);
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                Dragon dragon = parseCsvLine(line);
-                // validate, exception if not valid
+        try {
+            // парсим и валидируем драконов из всех файлов
+            for (InputStream inputStream : inputStreams) {
+                List<Dragon> dragons = parseDragonsFromCsv(inputStream);
+                allDragons.addAll(dragons);
+            }
+
+            // проверка валидности всех драконов
+            for (Dragon dragon : allDragons) {
                 if (!dragon.isValid()) {
                     System.out.println("dragon: %b\ncoordinates: %b\ncave: %b\nkiller: %b\nlocation: %b\nhead: %b".formatted(
                             dragon.isValid(),
@@ -49,23 +53,24 @@ public class DragonImportService {
                             dragon.getKiller().getLocation().isValid(),
                             dragon.getHead().isValid()
                     ));
-                    throw new Exception("Invalid dragon");
+                    throw new Exception("Invalid dragon found");
                 }
-                dragons.add(dragon);
             }
-            System.out.println("size: " + dragons.size());
+
             // сохраняем всех драконов в транзакции (если какой-то из драконов невалидный, до этой строки не доходит)
-            dragonService.createAll(dragons);
-            // import history row
+            dragonService.createAll(allDragons);
+
+            // логируем успешный импорт
             importHistoryUnit.setStatus(ImportStatus.SUCCESS);
-            importHistoryUnit.setRowsAdded(dragons.size());
+            importHistoryUnit.setRowsAdded(allDragons.size());
         } catch (Exception e) {
+            // логируем ошибку
             importHistoryUnit.setStatus(ImportStatus.FAILURE);
             importHistoryUnit.setRowsAdded(0);
+            throw e;
         } finally {
             importHistoryRepository.save(importHistoryUnit);
         }
-
     }
 
     public List<ImportHistoryUnitDTO> getImportHistory(User user, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
@@ -78,8 +83,20 @@ public class DragonImportService {
         return importHistory;
     }
 
+    private List<Dragon> parseDragonsFromCsv(InputStream inputStream) throws Exception {
+        List<Dragon> dragons = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Dragon dragon = parseCsvLine(line);
+                dragons.add(dragon);
+            }
+        }
+        return dragons;
+    }
+
     private Dragon parseCsvLine(String line) {
-        Function<String, Boolean> isEmptyString = s -> s.isEmpty();
+        Function<String, Boolean> isEmptyString = s -> s.isEmpty(); // можно, наверное, добавить isBlank()
 
         String[] parts = line.split(";");
 
@@ -130,6 +147,4 @@ public class DragonImportService {
         System.out.println(dragon.toJson());
         return dragon;
     }
-
-
 }
