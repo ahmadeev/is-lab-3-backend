@@ -359,7 +359,7 @@ public class DragonService {
             System.out.println("dragon does not exist");
             return new PairReturnBooleanString(false, "Dragon does not exist.");
         }
-        if (dragon.getOwnerId() != userId) {
+        if (dragon.getOwnerId() != userId && !isAdmin) {
             System.out.println("you are not allowed to delete this dragon");
             return new PairReturnBooleanString(
                     false,
