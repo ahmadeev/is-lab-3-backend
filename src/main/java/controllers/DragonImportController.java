@@ -63,10 +63,12 @@ public class DragonImportController {
                 dragonImportService.importDragonsFromCsv(inputStream, user);
             }
 
-            return Response.ok().entity("Dragons imported successfully").build();
+            return Response.ok()
+                    .entity(new ResponseEntity(ResponseStatus.SUCCESS, "Dragons imported successfully", null))
+                    .build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Error during import: " + e.getMessage())
+                    .entity(new ResponseEntity(ResponseStatus.ERROR, "Error during import: " + e.getMessage(), null))
                     .build();
         }
     }

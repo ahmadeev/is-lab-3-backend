@@ -26,10 +26,10 @@ public class ImportHistoryRepository {
     public List<ImportHistoryUnitDTO> findAll(long userId, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
         // в будущем необходимо добавить id и ownerId
         Map<String, String> columnNames = Map.ofEntries(
-                Map.entry("id", "ih.id"),
-                Map.entry("status", "ih.status"),
-                Map.entry("user_id", "ih.user_id"),
-                Map.entry("rows_added", "ih.rows_added")
+                Map.entry("ID", "ih.id"),
+                Map.entry("Status", "ih.status"),
+                Map.entry("User ID", "ih.user_id"),
+                Map.entry("Rows added", "ih.rows_added")
         );
 
         // столбцы, содержащие числовые значения
