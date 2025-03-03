@@ -20,7 +20,8 @@ import java.util.Objects;
 @Audited
 public class DragonHead {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "head_seq")
+    @SequenceGenerator(name = "head_seq", sequenceName = "head_sequence", allocationSize = 50)
     private long id;
 
     @Column(name = "eyes_count")

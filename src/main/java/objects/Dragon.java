@@ -22,8 +22,10 @@ import java.util.Objects;
 @AllArgsConstructor
 @Audited
 public class Dragon {
+    // такой тип генерации, потому что IDENTITY требует следующий айди после инсерта (а из-за батчей их кратно меньше)
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "dragon_seq") // вместо @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "dragon_seq", sequenceName = "dragon_sequence", allocationSize = 50)
     private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
 
     @NotNull(message = "Поле name не должно быть пустым")

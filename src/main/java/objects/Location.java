@@ -20,7 +20,8 @@ import java.util.Objects;
 @Audited
 public class Location {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "location_seq")
+    @SequenceGenerator(name = "location_seq", sequenceName = "location_sequence", allocationSize = 50)
     private long id;
 
     @Column(name = "x")

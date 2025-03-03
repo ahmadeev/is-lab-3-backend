@@ -20,7 +20,8 @@ import java.util.Objects;
 @Audited
 public class DragonCave {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cave_seq")
+    @SequenceGenerator(name = "cave_seq", sequenceName = "cave_sequence", allocationSize = 50)
     private long id;
 
     @Positive

@@ -24,7 +24,8 @@ import java.util.Objects;
 @Audited
 public class Person {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "person_seq")
+    @SequenceGenerator(name = "person_seq", sequenceName = "person_sequence", allocationSize = 50)
     private long id;
 
     @NotNull(message = "Поле name не должно быть пустым")

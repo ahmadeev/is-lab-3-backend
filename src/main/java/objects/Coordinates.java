@@ -22,7 +22,8 @@ import java.util.Objects;
 @Audited
 public class Coordinates {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "coordinates_seq")
+    @SequenceGenerator(name = "coordinates_seq", sequenceName = "coordinates_sequence", allocationSize = 50)
     private long id;
 
     @DecimalMin(value = "-596", inclusive = false)
