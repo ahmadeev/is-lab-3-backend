@@ -15,6 +15,7 @@ import repositories.ImportHistoryRepository;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -38,7 +39,7 @@ public class DragonImportService {
         try {
             // парсим и валидируем драконов из всех файлов
             for (InputStream inputStream : inputStreams) {
-                List<Dragon> dragons = parseDragonsFromCsv(inputStream);
+                List<Dragon> dragons = parseDragonsFromCsv(inputStream, user);
                 allDragons.addAll(dragons);
             }
 
@@ -83,12 +84,34 @@ public class DragonImportService {
         return importHistory;
     }
 
-    private List<Dragon> parseDragonsFromCsv(InputStream inputStream) throws Exception {
+    private List<Dragon> parseDragonsFromCsv(InputStream inputStream, User user) throws Exception {
         List<Dragon> dragons = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+        // явная установка кодировки помогает убрать кракозябры из данных (кораптилось имя первого дракона)
+        // гугл говорил про BOM (Byte Order Mark)
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 Dragon dragon = parseCsvLine(line);
+                // TODO: вероятно, глупые костыли
+
+                dragon.setOwnerId(user.getId());
+                dragon.setUpdatedBy(user.getId());
+
+                dragon.getCoordinates().setOwnerId(user.getId());
+                dragon.getCoordinates().setUpdatedBy(user.getId());
+
+                dragon.getCave().setOwnerId(user.getId());
+                dragon.getCave().setUpdatedBy(user.getId());
+
+                dragon.getKiller().setOwnerId(user.getId());
+                dragon.getKiller().setUpdatedBy(user.getId());
+
+                dragon.getKiller().getLocation().setOwnerId(user.getId());
+                dragon.getKiller().getLocation().setUpdatedBy(user.getId());
+
+                dragon.getHead().setOwnerId(user.getId());
+                dragon.getHead().setUpdatedBy(user.getId());
+
                 dragons.add(dragon);
             }
         }

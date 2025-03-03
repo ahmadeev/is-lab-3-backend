@@ -50,6 +50,8 @@ public class DragonImportController {
         User user = new User();
         user.setId(userId);
 
+        System.out.println("name: " + securityContext.getUserPrincipal().getName() + ", id: " + userId);
+
         try {
             // получаем файлы из multipart запроса
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();

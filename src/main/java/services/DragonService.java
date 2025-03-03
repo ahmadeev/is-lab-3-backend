@@ -367,10 +367,29 @@ public class DragonService {
             );
         }
 
+        // TODO: из-за каскадного удаления запрещаем удалять дракона, если запрещено удалять хоть что-то внутри него
+        if (!(dragon.isAllowEditing()
+                && dragon.getCoordinates().isAllowEditing()
+                && dragon.getCave().isAllowEditing()
+                && dragon.getKiller().isAllowEditing()
+                && dragon.getKiller().getLocation().isAllowEditing()
+                && dragon.getHead().isAllowEditing()
+        )) {
+            System.out.println("dragon can be deleted by owner only");
+            return new PairReturnBooleanString(
+                    false,
+                    "You are not allowed to delete this dragon. Dragon can be deleted by owner only."
+            );
+        }
+
         // проверять по собственным id вложенных объектов и проверять, есть ли dragon с такими же id вложенных объектов
         // эээээээээааааа ??? а нужно ли?
 
-        em.remove(dragon);
+        try {
+            em.remove(dragon);
+        } catch (Exception e) {
+            return new PairReturnBooleanString(false, e.getMessage());
+        }
 
         return new PairReturnBooleanString(true, "Successfully deleted dragon.");
     }

@@ -89,7 +89,7 @@ public class Dragon {
 
     // ------------
 
-    // + owner_id
+    // + owner_id // TODO: НО БЕЗ updatedBy ???
     public Dragon(
             String name,
             Coordinates coordinates,

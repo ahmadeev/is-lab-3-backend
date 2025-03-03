@@ -12,6 +12,8 @@ import org.hibernate.envers.Audited;
 
 import java.util.Objects;
 
+// новые ограничения уникальности: уникальная пара (x, y) для объекта Dragon.Coordinates
+// так нельзя: uniqueConstraints = {@UniqueConstraint(columnNames = {"x", "y"})}
 @Entity
 @Table(name = "coordinates")
 @Getter @Setter
