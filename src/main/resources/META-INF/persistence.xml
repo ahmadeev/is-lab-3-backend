@@ -27,6 +27,9 @@
             <property name="hibernate.order_updates" value="true"/>
             <property name="hibernate.batch_versioned_data" value="true"/>
 
+<!--            <property name="hibernate.connection.isolation" value="8" />-->
+            <!-- Другие значения: 0 - TRANSACTION_NONE, 1 - READ_UNCOMMITTED, 2 - READ_COMMITTED, 4 - REPEATABLE_READ -->
+
         </properties>
     </persistence-unit>
 </persistence>

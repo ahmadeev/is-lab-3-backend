@@ -6,6 +6,9 @@ import dto.DragonHeadDTO;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceException;
+import jakarta.transaction.TransactionalException;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -13,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import objects.*;
+import org.hibernate.TransactionException;
 import responses.ResponseEntity;
 import responses.ResponseStatus;
 import jakarta.inject.Inject;
@@ -20,6 +24,7 @@ import services.DragonService;
 import utils.DragonWebSocket;
 import utils.PairReturnBooleanString;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,15 +120,22 @@ public class DragonController {
         long userId = authService.getUserByName(username).getId();
         System.out.println(userId);
 
-        boolean isUpdated = dragonService.updateDragonById(id, userId, dragonDTO, isAdmin);
+        boolean isUpdated = false;
+        try {
+            isUpdated = dragonService.updateDragonById(id, userId, dragonDTO, isAdmin);
+        } catch (Exception e) {
+            return Response.status(Response.Status.FORBIDDEN).entity(
+                    new ResponseEntity(ResponseStatus.ERROR,"Dragon was not updated due to sql error", null)
+            ).build();
+        }
 
         if (isUpdated) {
+            DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
+
             return Response.ok().entity(
                     new ResponseEntity(ResponseStatus.SUCCESS,"Successfully updated dragon", null)
             ).build();
         }
-
-        DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 
         return Response.status(Response.Status.FORBIDDEN).entity(
                 new ResponseEntity(ResponseStatus.ERROR,"Dragon was not updated", null)
@@ -153,9 +165,9 @@ public class DragonController {
         } catch (Exception e) {
             result = new PairReturnBooleanString(
                     false,
-                    "You are not allowed to delete this dragon. Dragon is linked to another dragon(s)."
+                    e.getMessage() // "You are not allowed to delete this dragon. Dragon is linked to another dragon(s)."
             );
-        }
+        } // TransactionalException | PersistenceException
 
         DragonWebSocket.broadcast((new ResponseEntity(ResponseStatus.SUCCESS, "Table needs to be updated!", null)).toJson());
 

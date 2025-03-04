@@ -341,6 +341,7 @@ public class DragonService {
     @Transactional
     public PairReturnBooleanString deleteDragonById(long id, long userId, boolean isAdmin) {
         Dragon dragon = em.find(Dragon.class, id);
+        // TODO: вероятно, можно сделать просто так: Dragon dragon = new Dragon(); dragon.setId(id);
 
         if (dragon == null) {
             System.out.println("dragon does not exist");
