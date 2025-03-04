@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import objects.*;
 import utils.PairReturnBooleanString;
+import utils.UniqueConstraintViolationException;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,20 @@ public class DragonService {
     public Dragon createDragon(DragonDTO dto, long userId) {
 
         Dragon dragon = createEntityFromDTO(dto);
+
+        // Проверка уникальности name + age
+        boolean exists = em.createQuery(
+                        "SELECT COUNT(d) FROM Dragon d WHERE d.name = :name AND d.age = :age",
+                        Long.class)
+                .setParameter("name", dragon.getName())
+                .setParameter("age", dragon.getAge())
+                .getSingleResult() > 0;
+
+        if (exists) {
+            throw new UniqueConstraintViolationException(
+                    "Дракон с именем " + dragon.getName() + " и возрастом " + dragon.getAge() + " уже существует"
+            );
+        }
 
         // можно проверять и на null, но смысла мало
         // TODO: if стоит перевернуть (из-за этого были проблемы на лабе, но сейчас уже все хорошо)
@@ -110,6 +125,22 @@ public class DragonService {
     public List<Dragon> createAll(List<Dragon> dragons) {
         long start = System.nanoTime();
         for (int i = 0; i < dragons.size(); i++) {
+
+            // Проверка уникальности name + age
+            boolean exists = em.createQuery(
+                            "SELECT COUNT(d) FROM Dragon d WHERE d.name = :name AND d.age = :age",
+                            Long.class)
+                    .setParameter("name", dragons.get(i).getName())
+                    .setParameter("age", dragons.get(i).getAge())
+                    .getSingleResult() > 0;
+
+            if (exists) {
+                System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+                throw new UniqueConstraintViolationException(
+                        "Дракон с именем " + dragons.get(i).getName() + " и возрастом " + dragons.get(i).getAge() + " уже существует"
+                );
+            }
+
             em.persist(dragons.get(i));
             if (i % BATCH_SIZE == 0) {  // Очищаем кэш после каждой партии // TODO: а можно ли не создавать переменную, а подтянуть из конфига?
                 em.flush();
@@ -223,6 +254,20 @@ public class DragonService {
         // TODO: осталось добавить обработку галочки на разрешение редактирования
         if (dragon == null) return false;
         if (!(dragon.getOwnerId() == userId || isUserAdmin && dragon.isAllowEditing())) return false;
+
+        // Проверка уникальности name + age
+        boolean exists = em.createQuery(
+                        "SELECT COUNT(d) FROM Dragon d WHERE d.name = :name AND d.age = :age",
+                        Long.class)
+                .setParameter("name", dragon.getName())
+                .setParameter("age", dragon.getAge())
+                .getSingleResult() > 0;
+
+        if (exists) {
+            throw new UniqueConstraintViolationException(
+                    "Дракон с именем " + dragon.getName() + " и возрастом " + dragon.getAge() + " уже существует"
+            );
+        }
 
         // можно проверять и на null, но смысла мало
         // 1) апдейтим с помощью уже существующих объектов (в таком случае старые просто подвисают), заменяя старый айди на новый
