@@ -1,16 +1,20 @@
 package utils;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
+@Singleton
+@Startup
 public class EnvLoader {
     @PostConstruct
     public void init() {
-        loadEnv(".env");
+        loadEnv("C:\\Users\\danis\\Desktop\\is-template-2\\ЛАБА 3\\is-lab-2-backend\\.env");
         System.out.println("=============== Env loaded ===============");
     }
 
