@@ -53,7 +53,7 @@ public class DragonImportController {
             try (ZipOutputStream zipOut = new ZipOutputStream(output)) {
                 for (FileUploadData fileData : files) {
                     try (InputStream fileStream = fileData.getInputStream()) {
-                        ZipEntry entry = new ZipEntry(fileData.getFileName());
+                        ZipEntry entry = new ZipEntry(fileData.getOriginalFileName());
                         zipOut.putNextEntry(entry);
 
                         byte[] buffer = new byte[4096];
