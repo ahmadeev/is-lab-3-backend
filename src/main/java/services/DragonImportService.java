@@ -61,7 +61,7 @@ public class DragonImportService {
 
             // обходим список метаданных файлов (кастомное)
             for (FileUploadData fileData : fileUploads) {
-                String originalFileName = fileData.getFileName();
+                String originalFileName = fileData.getOriginalFileName();
                 String contentType = fileData.getContentType();
                 // читаем содержимое файла в массив байтов для повторного использования потока
                 byte[] fileBytes = IOUtils.toByteArray(fileData.getInputStream());
@@ -79,7 +79,7 @@ public class DragonImportService {
 
                 // todo: костылёк в целом
                 fileData.setFileName(permanentFileName);
-                System.out.println(fileData.toString());
+                // System.out.println(fileData.toString());
                 filesToUpload.add(fileData);
 
                 List<Dragon> allDragons = new ArrayList<>();
