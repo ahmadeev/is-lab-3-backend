@@ -1,9 +1,6 @@
 package services;
 
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.CopyObjectArgs;
+import io.minio.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.Getter;
@@ -29,6 +26,18 @@ public class MinioService {
                 .endpoint(minioUrl)
                 .credentials(minioUser, minioPassword)
                 .build();
+    }
+
+    public InputStream downloadFile(String objectName) throws Exception {
+        System.out.println("[MinIO] file download started");
+        InputStream inputStream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket("import-files")
+                        .object(objectName)
+                        .build()
+        );
+        System.out.println("[MinIO] file download ended");
+        return inputStream;
     }
 
     public void uploadFile(String objectName, InputStream inputStream, long size, String contentType) throws Exception {

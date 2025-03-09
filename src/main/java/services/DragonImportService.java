@@ -44,12 +44,14 @@ public class DragonImportService {
     public void importDragonsFromCsvWith2PC(List<FileUploadData> fileUploads, User user) throws Exception {
         Map<String, String> tempToPerm = new HashMap<>();
         int dragonsCount = 0;
+        List<FileUploadData> filesToUpload = new ArrayList<>();
 
         // запись в журнале
         ImportHistoryUnit importHistoryUnit = new ImportHistoryUnit();
         importHistoryUnit.setUser(user);
         importHistoryUnit.setStatus(ImportStatus.PENDING);
-        importHistoryUnit.setRowsAdded(0);
+        importHistoryUnit.setRowsAdded(dragonsCount);
+        importHistoryUnit.setFiles(filesToUpload);
 
         // TODO: вне транзакции эээээ // propaganation из ejb ???
         importHistoryRepository.save(importHistoryUnit);
@@ -66,11 +68,19 @@ public class DragonImportService {
                 // fix: размер считаем сами
                 long fileSize = Math.max(fileData.getFileSize(), fileBytes.length);
 
+                // todo: костылёк в целом
+                fileData.setFileSize(fileSize);
+
                 // генерируем временное и постоянное имена
                 String tempFileName = "temp_" + UUID.randomUUID() + "_" + originalFileName;
                 String permanentFileName = "import_" + UUID.randomUUID() + "_" + originalFileName;
                 // fix
                 tempToPerm.put(tempFileName, permanentFileName);
+
+                // todo: костылёк в целом
+                fileData.setFileName(permanentFileName);
+                System.out.println(fileData.toString());
+                filesToUpload.add(fileData);
 
                 List<Dragon> allDragons = new ArrayList<>();
                 try {
@@ -120,6 +130,7 @@ public class DragonImportService {
 
         } catch (Exception e) {
             dragonsCount = 0;
+            filesToUpload.clear();
 
             // откат транзакции при ошибке (и бд, и фх)
             try {
@@ -145,6 +156,7 @@ public class DragonImportService {
                 importHistoryUnit.setStatus(ImportStatus.SUCCESS);
             }
             importHistoryUnit.setRowsAdded(dragonsCount);
+            importHistoryUnit.setFiles(filesToUpload);
             importHistoryRepository.update(importHistoryUnit);
         }
     }

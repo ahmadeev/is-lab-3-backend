@@ -82,7 +82,7 @@ public class DragonImportController {
                 }
 
                 InputStream stream = part.getBody(InputStream.class, null);
-                files.add(new FileUploadData(stream, fileName, fileSize, contentType));
+                files.add(new FileUploadData(fileName, fileSize, contentType, stream));
             }
 
             // передаём список файлов в сервис импорта
