@@ -13,13 +13,11 @@ import objects.*;
 import objects.utils.ImportHistoryUnit;
 import objects.utils.ImportStatus;
 import org.apache.commons.compress.utils.IOUtils;
+import repositories.FileDataRepository;
 import repositories.ImportHistoryRepository;
 import utils.FileUploadData;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
@@ -35,10 +33,30 @@ public class DragonImportService {
     private ImportHistoryRepository importHistoryRepository;
 
     @Inject
+    private FileDataRepository fileDataRepository;
+
+    @Inject
     private MinioService minioService;
 
     @Resource
     private UserTransaction userTransaction; // Программное управление транзакциями
+
+    @Transactional
+    public List<FileUploadData> exportFiles(long id) {
+
+        List<FileUploadData> files = fileDataRepository.getByImportHistoryUnitId(id);
+
+        for(FileUploadData file : files) {
+            String filename = file.getFileName();
+            try {
+                file.setInputStream(minioService.downloadFile(filename));
+            } catch (Exception e) {
+                System.out.println("Error downloading file " + filename);
+                return null;
+            }
+        }
+        return files;
+    }
 
     // двухфазный коммит (старый метод на месте, но не используется)
     public void importDragonsFromCsvWith2PC(List<FileUploadData> fileUploads, User user) throws Exception {

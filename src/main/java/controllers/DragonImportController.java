@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Named(value = "dragonImportController")
@@ -35,6 +37,41 @@ public class DragonImportController {
 
     @Inject
     private AuthService authService;
+
+    @GET
+    @Path("/csv/{id}")
+    @Produces("application/zip")
+    public Response uploadDragons(@PathParam("id") long id, @Context SecurityContext securityContext) {
+        // TODO: переделать с JWT
+        long userId = authService.getUserByName(securityContext.getUserPrincipal().getName()).getId();
+        User user = new User();
+        user.setId(userId);
+
+        List<FileUploadData> files = dragonImportService.exportFiles(id);
+
+        StreamingOutput zipStream = output -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(output)) {
+                for (FileUploadData fileData : files) {
+                    try (InputStream fileStream = fileData.getInputStream()) {
+                        ZipEntry entry = new ZipEntry(fileData.getFileName());
+                        zipOut.putNextEntry(entry);
+
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = fileStream.read(buffer)) != -1) {
+                            zipOut.write(buffer, 0, bytesRead);
+                        }
+                        zipOut.closeEntry();
+                    }
+                }
+            }
+        };
+
+        return Response.ok(zipStream)
+                .type("application/zip")
+                .header("Content-Disposition", "attachment; filename=\"files.zip\"")
+                .build();
+    }
 
     @POST
     @Path("/csv")
