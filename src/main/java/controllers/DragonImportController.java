@@ -9,16 +9,13 @@ import jakarta.inject.Named;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.ws.rs.*;
 
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
-import objects.utils.ImportHistoryUnit;
+import jakarta.ws.rs.core.*;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import responses.ResponseEntity;
 import responses.ResponseStatus;
 import services.DragonImportService;
+import utils.FileUploadData;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -46,18 +43,13 @@ public class DragonImportController {
     public Response uploadDragons(MultipartFormDataInput input, @Context SecurityContext securityContext) {
         // TODO: переделать с JWT
         long userId = authService.getUserByName(securityContext.getUserPrincipal().getName()).getId();
-
         User user = new User();
         user.setId(userId);
 
-        System.out.println("name: " + securityContext.getUserPrincipal().getName() + ", id: " + userId);
-
         try {
-            // получаем файлы из multipart запроса
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
             List<InputPart> inputParts = uploadForm.get("files");
-
-            if (inputParts.isEmpty()) {
+            if (inputParts == null || inputParts.isEmpty()) {
                 inputParts = uploadForm.get("file");
             }
 
@@ -68,13 +60,34 @@ public class DragonImportController {
                         .build();
             }
 
-            // обрабатываем каждый файл
-            List<InputStream> inputStreams = new ArrayList<>();
+            List<FileUploadData> files = new ArrayList<>();
             for (InputPart part : inputParts) {
-                inputStreams.add(part.getBody(InputStream.class, null));
+                MultivaluedMap<String, String> headers = part.getHeaders();
+                String contentDisposition = headers.getFirst("Content-Disposition");
+                String fileName = parseFileName(contentDisposition);
+
+                String contentLengthStr = headers.getFirst("Content-Length");
+                long fileSize = 0;
+                if (contentLengthStr != null) {
+                    try {
+                        fileSize = Long.parseLong(contentLengthStr);
+                    } catch (NumberFormatException ex) {
+                        // TODO: Если не удалось получить размер, можно оставить fileSize = 0, но это может повлиять на загрузку
+                    }
+                }
+
+                String contentType = headers.getFirst("Content-Type");
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                InputStream stream = part.getBody(InputStream.class, null);
+                files.add(new FileUploadData(stream, fileName, fileSize, contentType));
             }
 
-            dragonImportService.importDragonsFromCsv(inputStreams, user);
+            // передаём список файлов в сервис импорта
+            // importDragonsFromCsv последний раз видели в коммите 57f0594e
+            dragonImportService.importDragonsFromCsvWith2PC(files, user);
 
             return Response.ok()
                     .entity(new ResponseEntity(ResponseStatus.SUCCESS, "Dragons imported successfully", null))
@@ -84,6 +97,21 @@ public class DragonImportController {
                     .entity(new ResponseEntity(ResponseStatus.ERROR, "Error during import: " + e.getMessage(), null))
                     .build();
         }
+    }
+
+    private String parseFileName(String contentDisposition) {
+        if (contentDisposition == null) {
+            return "unknown";
+        }
+        for (String cdPart : contentDisposition.split(";")) {
+            if (cdPart.trim().startsWith("filename")) {
+                String[] namePair = cdPart.split("=");
+                if (namePair.length > 1) {
+                    return namePair[1].trim().replaceAll("\"", "");
+                }
+            }
+        }
+        return "unknown";
     }
 
     @GET

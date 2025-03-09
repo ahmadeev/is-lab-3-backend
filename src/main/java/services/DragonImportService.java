@@ -10,14 +10,16 @@ import jakarta.transaction.Transactional;
 import objects.*;
 import objects.utils.ImportHistoryUnit;
 import objects.utils.ImportStatus;
+import org.apache.commons.compress.utils.IOUtils;
 import repositories.ImportHistoryRepository;
+import utils.FileUploadData;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 
@@ -29,6 +31,107 @@ public class DragonImportService {
 
     @Inject
     private ImportHistoryRepository importHistoryRepository;
+
+    @Inject
+    private MinioService minioService;
+
+    // двухфазный коммит (старый метод на месте, но не используется)
+    @Transactional
+    public void importDragonsFromCsvWith2PC(List<FileUploadData> fileUploads, User user) throws Exception {
+        Map<String, String> tempToPerm = new HashMap<>();
+
+        int dragonsCount = 0;
+
+        // TODO: propaganation из ejb ???
+        ImportHistoryUnit importHistoryUnit = new ImportHistoryUnit();
+        importHistoryUnit.setUser(user);
+        importHistoryUnit.setStatus(ImportStatus.PENDING);
+        importHistoryUnit.setRowsAdded(0);
+        importHistoryRepository.save(importHistoryUnit);
+
+        try {
+            // обходим список метаданных файлов (кастомное)
+            for (FileUploadData fileData : fileUploads) {
+                String originalFileName = fileData.getFileName();
+                String contentType = fileData.getContentType();
+
+                // читаем содержимое файла в массив байтов для повторного использования потока
+                byte[] fileBytes = IOUtils.toByteArray(fileData.getInputStream());
+
+                // fix: размер считаем сами
+                long fileSize = Math.max(fileData.getFileSize(), fileBytes.length);
+
+                // генерируем временное и постоянное имена
+                String tempFileName = "temp_" + UUID.randomUUID() + "_" + originalFileName;
+                String permanentFileName = "import_" + UUID.randomUUID() + "_" + originalFileName;
+
+                // fix
+                tempToPerm.put(tempFileName, permanentFileName);
+
+                List<Dragon> allDragons = new ArrayList<>();
+                try {
+                    // фаза Prepare: Загружаем файл во временное хранилище MinIO
+                    ByteArrayInputStream uploadStream = new ByteArrayInputStream(fileBytes);
+                    minioService.uploadFile(tempFileName, uploadStream, fileSize, contentType);
+
+                    System.out.println("parsing file: " + originalFileName);
+                    // парсим CSV (используем новый поток, так как предыдущий уже исчерпан)
+                    ByteArrayInputStream parseStream = new ByteArrayInputStream(fileBytes);
+                    List<Dragon> dragons = parseDragonsFromCsv(parseStream, user);
+                    allDragons.addAll(dragons);
+
+                    System.out.println("validating file: " + originalFileName);
+                    // валидация каждого объекта
+                    for (Dragon dragon : allDragons) {
+                        if (!dragon.isValid()) {
+                            throw new Exception("Invalid dragon found in file " + originalFileName);
+                        }
+                    }
+                    dragonsCount += allDragons.size();
+
+                    System.out.println("saving file: " + originalFileName);
+                    // сохраняем всех драконов в БД
+                    dragonService.createAll(allDragons);
+
+                } catch (Exception e) {
+                    dragonsCount = 0;
+                    // если произошла ошибка, удаляем временный файл, если он был загружен
+                    System.out.println("exception during prepare phase: " + e.getMessage());
+
+                    try {
+                        for(String key : tempToPerm.keySet()) {
+                            System.out.println("deleting file: " + key);
+                            minioService.deleteFile(key);
+                        }
+                    } catch (Exception delEx) {
+                        delEx.printStackTrace();
+                    }
+                    throw new RuntimeException(e);
+                }
+            }
+
+            // фаза Commit: Подтверждение сохранения файла
+            for(String key : tempToPerm.keySet()) {
+                try {
+                    System.out.println("commiting file: " + key);
+                    minioService.commitFile(key, tempToPerm.get(key));
+                } catch (Exception e) {
+                    System.out.println("exception during commit phase: " + e.getMessage());
+                    dragonsCount = 0;
+                    throw new RuntimeException("Error during file commit for file: " + tempToPerm.get(key), e);
+                }
+            }
+        } catch (Exception e) {
+            importHistoryUnit.setStatus(ImportStatus.FAILURE);
+            throw e;
+        } finally {
+            if (importHistoryUnit.getStatus() != ImportStatus.FAILURE) {
+                importHistoryUnit.setStatus(ImportStatus.SUCCESS);
+            }
+            importHistoryUnit.setRowsAdded(dragonsCount);
+            importHistoryRepository.update(importHistoryUnit);
+        }
+    }
 
     @Transactional
     public void importDragonsFromCsv(List<InputStream> inputStreams, User user) throws Exception {
@@ -167,7 +270,7 @@ public class DragonImportService {
                 ),
                 Boolean.parseBoolean(parts[23])
         );
-        System.out.println(dragon.toJson());
+        // System.out.println(dragon.toJson());
         return dragon;
     }
 }

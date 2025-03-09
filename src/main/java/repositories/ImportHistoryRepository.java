@@ -23,6 +23,11 @@ public class ImportHistoryRepository {
     }
 
     @Transactional
+    public void update(ImportHistoryUnit unit) {
+        em.merge(unit);
+    }
+
+    @Transactional
     public List<ImportHistoryUnitDTO> findAll(long userId, int page, int pageSize, String filterValue, String filterCol, String sortBy, String sortDir) {
         // в будущем необходимо добавить id и ownerId
         Map<String, String> columnNames = Map.ofEntries(
