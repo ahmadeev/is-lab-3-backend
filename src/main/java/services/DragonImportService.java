@@ -71,6 +71,8 @@ public class DragonImportService {
         importHistoryUnit.setRowsAdded(dragonsCount);
         importHistoryUnit.setFiles(filesToUpload);
 
+        importHistoryRepository.save(importHistoryUnit);
+
 /*        // TODO: вне транзакции эээээ // propaganation из ejb ???
         importHistoryRepository.save(importHistoryUnit);*/
 
@@ -79,7 +81,8 @@ public class DragonImportService {
 
             // если смещение айдишников не проблема, то можно оставить здесь
             // такая же проблема при импорте закорапченных данных, айдишники смещаются на количество объектов в файле
-            importHistoryRepository.save(importHistoryUnit);
+            // другая проблема: если прилетает много транзакций, лог тоже откатится
+            // importHistoryRepository.save(importHistoryUnit);
 
             // обходим список метаданных файлов (кастомное)
             for (FileUploadData fileData : fileUploads) {

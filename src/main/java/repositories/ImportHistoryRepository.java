@@ -18,8 +18,9 @@ public class ImportHistoryRepository {
     private EntityManager em;
 
     @Transactional
-    public void save(ImportHistoryUnit unit) {
+    public ImportHistoryUnit save(ImportHistoryUnit unit) {
         em.persist(unit);
+        return unit;
     }
 
     @Transactional

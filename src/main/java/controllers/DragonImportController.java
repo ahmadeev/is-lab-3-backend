@@ -41,7 +41,7 @@ public class DragonImportController {
     @GET
     @Path("/csv/{id}")
     @Produces("application/zip")
-    public Response uploadDragons(@PathParam("id") long id, @Context SecurityContext securityContext) {
+    public Response downloadDragons(@PathParam("id") long id, @Context SecurityContext securityContext) {
         // TODO: переделать с JWT
         long userId = authService.getUserByName(securityContext.getUserPrincipal().getName()).getId();
         User user = new User();
